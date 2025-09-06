@@ -1,5 +1,6 @@
 export interface TravelPlan {
     id: string;
+    user_id: string;
     title: string;
     destination: string;
     startDate: Date;
@@ -15,6 +16,7 @@ export interface TravelPlan {
 
 export interface Activity {
     id: string;
+    plan_id: string;
     title: string;
     description?: string;
     date: Date;
