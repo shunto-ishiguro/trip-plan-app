@@ -1,38 +1,29 @@
-// lib/api.ts
-import { supabase } from './supabaseClient';
-import { TravelPlan } from '../app/types/travel'; // TravelPlan 型を使う場合
+import { supabase } from '../supabaseClient';
+import { TravelPlan } from '../../app/types/travel';
 
-// 旅行プラン一覧を取得(GET)
+// 一覧取得
 export async function getTravelPlans(): Promise<TravelPlan[]> {
     const { data, error } = await supabase
         .from('travel_plans')
         .select('*')
         .order('created_at', { ascending: false });
 
-    if (error) {
-        console.error('Error fetching travel plans:', error);
-        return [];
-    }
-
+    if (error) throw error;
     return data as TravelPlan[];
 }
 
-// 新しい旅行プランを追加 (POST)
+// 新規追加
 export async function addTravelPlan(plan: Omit<TravelPlan, 'id' | 'createdAt' | 'updatedAt'>) {
     const { data, error } = await supabase
         .from('travel_plans')
-        .insert([{
-            ...plan,
-            created_at: new Date(),
-            updated_at: new Date(),
-        }])
+        .insert([{ ...plan, created_at: new Date(), updated_at: new Date() }])
         .select();
 
     if (error) throw error;
     return data[0];
 }
 
-// 旅行プランを更新 (PUT / PATCH)
+// 更新
 export async function updateTravelPlan(id: string, updates: Partial<TravelPlan>) {
     const { data, error } = await supabase
         .from('travel_plans')
@@ -44,12 +35,8 @@ export async function updateTravelPlan(id: string, updates: Partial<TravelPlan>)
     return data[0];
 }
 
-// 旅行プランを削除 (DELETE)
+// 削除
 export async function deleteTravelPlan(id: string) {
-    const { error } = await supabase
-        .from('travel_plans')
-        .delete()
-        .eq('id', id);
-
+    const { error } = await supabase.from('travel_plans').delete().eq('id', id);
     if (error) throw error;
 }

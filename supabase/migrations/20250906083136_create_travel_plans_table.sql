@@ -1,6 +1,13 @@
--- travel_plansテーブル
+-- app_users テーブル
+create table app_users (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamp with time zone default now()
+);
+
+-- travel_plans テーブル
 create table travel_plans (
-  id text primary key,
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references app_users(id) on delete cascade,
   title text not null,
   destination text,
   start_date date,
@@ -9,14 +16,14 @@ create table travel_plans (
   image_url text,
   budget integer,
   currency text,
-  created_at timestamp default now(),
-  updated_at timestamp default now()
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
 );
 
--- activitiesテーブル（旅行プランに紐づくアクティビティ用）
+-- activities テーブル
 create table activities (
-  id text primary key,
-  travel_plan_id text references travel_plans(id) on delete cascade,
+  id uuid primary key default gen_random_uuid(),
+  plan_id uuid references travel_plans(id) on delete cascade,
   title text not null,
   description text,
   date date,
@@ -24,5 +31,7 @@ create table activities (
   location text,
   cost integer,
   completed boolean default false,
-  category text
+  category text,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
 );
