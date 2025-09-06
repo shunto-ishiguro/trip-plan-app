@@ -42,3 +42,5 @@ export interface BudgetItem {
     amount: number;
     description: string;
 }
+
+export type ViewMode = 'list' | 'form' | 'detail';
