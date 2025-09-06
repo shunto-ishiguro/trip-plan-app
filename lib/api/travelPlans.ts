@@ -1,5 +1,7 @@
 import { supabase } from '../supabaseClient';
 import { TravelPlan } from '../../app/types/travel';
+//supabaseのプラン情報を取得、追加、更新するやつら
+
 
 // 一覧取得
 export async function getTravelPlans(): Promise<TravelPlan[]> {

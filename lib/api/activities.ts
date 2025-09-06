@@ -1,5 +1,6 @@
 import { supabase } from '../supabaseClient';
 import { Activity } from '../../app/types/travel';
+//特定のプランのアクティビティを取得、更新、追加するやつら
 
 // 特定の旅行プランに紐づくアクティビティ一覧を取ってくる
 export async function getActivitiesByPlanId(planId: string) {

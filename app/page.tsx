@@ -18,6 +18,7 @@ export default function App() {
     // サンプルデータ
     {
       id: '1',
+      user_id: 'aaa',
       title: '京都の紅葉旅行',
       destination: '京都府京都市',
       startDate: new Date('2024-11-15'),
@@ -29,6 +30,7 @@ export default function App() {
       activities: [
         {
           id: 'a1',
+          plan_id: 'aaa',
           title: '清水寺見学',
           description: '有名な清水の舞台からの景色を楽しむ',
           date: new Date('2024-11-15'),
@@ -40,6 +42,7 @@ export default function App() {
         },
         {
           id: 'a2',
+          plan_id: 'aaa',
           title: '湯豆腐ランチ',
           description: '嵐山の有名店で湯豆腐を味わう',
           date: new Date('2024-11-15'),
