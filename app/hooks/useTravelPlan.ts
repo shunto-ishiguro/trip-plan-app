@@ -119,7 +119,7 @@ export function useTravelPlan() {
   };
 
   const handleUpdatePlan = async (
-    planData: Omit<TravelPlan, 'id' | 'createdAt' | 'updatedAt'>
+    planData: Omit<TravelPlan, 'id' | 'user_id' | 'createdAt' | 'updatedAt'>
   ) => {
     if (!editingPlan) return;
 
