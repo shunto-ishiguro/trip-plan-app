@@ -22,6 +22,7 @@ export function TravelPlanCard({ plan, onView, onEdit, onDelete }: TravelPlanCar
     };
 
     const getDaysCount = () => {
+        if (!plan.startDate || !plan.endDate) return 0;
         const timeDiff = plan.endDate.getTime() - plan.startDate.getTime();
         return Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
     };

@@ -16,9 +16,9 @@ function registerUserIdInLocalStorage(userId: string) {
 }
 
 //ユーザーidを取得するやつ
-export async function getUserId() {
+export async function getUserId(): Promise<string>{
     const value = localStorage.getItem("user_id");
-    if(value === null){
+    if(!value){
         //userが存在しなかったときの処理
         const userId = await createAnonymousUserInDB();
         registerUserIdInLocalStorage(userId);
@@ -26,6 +26,7 @@ export async function getUserId() {
     }
     else{
         //userが存在したときの処理
+        console.log(value);
         return value;
     }
 }

@@ -55,8 +55,8 @@ export function useTravelPlan() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        setUserId(await getUserId());
-        setPlans(await getTravelPlans(userId));
+        const id = await getUserId();
+        setUserId(id);
       }
       catch (e) {
         console.error('ユーザー情報取得に失敗:', e);
@@ -64,6 +64,19 @@ export function useTravelPlan() {
     }
     fetchUser();
   }, []);
+  useEffect(() => {
+    if (!userId) return;
+    const getPlan = async () => {
+      try {
+        console.log(userId);
+        setPlans(await getTravelPlans(userId));
+      }
+      catch(e) {
+        console.error(e);
+      }
+    }
+    getPlan();
+  }, [userId]);
 
     /*[
     // サンプルデータ
@@ -116,8 +129,13 @@ export function useTravelPlan() {
         const toDB = {...travelPlanWithoutActivities, user_id: userId};
         const newPlan = await addTravelPlan(toDBPlan(toDB));
         if (!newPlan) throw new Error('新規プランの作成に失敗しました');
-        const newTravelPlan: TravelPlan = {...toTravelPlan(newPlan), activities};
-        setPlans([...plans, newTravelPlan]);
+        const toTravel = toTravelPlan(newPlan);
+        if(toTravel){
+          if(toTravel.id){
+            const newTravelPlan: TravelPlan = {...toTravel, activities: activities};
+            setPlans([...plans, newTravelPlan]);
+          }
+        }
         setViewMode('list');
       }else{
         throw new Error('userIdがnullです');
