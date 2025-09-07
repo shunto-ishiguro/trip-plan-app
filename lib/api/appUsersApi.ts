@@ -11,20 +11,22 @@ async function createAnonymousUserInDB() {
     if (error) throw error;
     return data[0].id; //自動生成されたUUIDを返す
 }
+
+
 function registerUserIdInLocalStorage(userId: string) {
     localStorage.setItem('user_id', userId);
 }
 
 //ユーザーidを取得するやつ
-export async function getUserId(): Promise<string>{
+export async function getUserId(): Promise<string> {
     const value = localStorage.getItem("user_id");
-    if(!value){
+    if (!value) {
         //userが存在しなかったときの処理
         const userId = await createAnonymousUserInDB();
         registerUserIdInLocalStorage(userId);
         return userId;
     }
-    else{
+    else {
         //userが存在したときの処理
         console.log(value);
         return value;
