@@ -49,9 +49,9 @@ const categoryColors: Record<ActivityCategory, string> = {
 };
 
 export function TravelPlanDetail({ plan, onBack, onEdit, onUpdateActivities }: TravelPlanDetailProps) {
-    const [activities, setActivities] = useState<Activity[]>(plan.activities);
+    const [activities, setActivities] = useState<Activity[]>(plan.activities || []);
     const [isAddingActivity, setIsAddingActivity] = useState(false);
-    const [newActivity, setNewActivity] = useState<Partial<Activity>>({
+    const [newActivity, setNewActivity] = useState<Omit<Activity, 'id' | 'plan_id'>>({
         title: '',
         description: '',
         date: new Date(),
@@ -71,12 +71,14 @@ export function TravelPlanDetail({ plan, onBack, onEdit, onUpdateActivities }: T
     };
 
     const getDaysCount = () => {
-        const timeDiff = plan.endDate.getTime() - plan.startDate.getTime();
+        const start = plan.startDate ? new Date(plan.startDate) : new Date();
+        const end = plan.endDate ? new Date(plan.endDate) : new Date();
+        const timeDiff = end.getTime() - start.getTime();
         return Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
     };
 
     const getTotalCost = () => {
-        return activities.reduce((total, activity) => total + (activity.cost || 0), 0);
+        return (activities || []).reduce((total, activity) => total + (activity.cost || 0), 0);
     };
 
     const addActivity = () => {
@@ -84,6 +86,7 @@ export function TravelPlanDetail({ plan, onBack, onEdit, onUpdateActivities }: T
 
         const activity: Activity = {
             id: Date.now().toString(),
+            plan_id: plan.id,
             title: newActivity.title,
             description: newActivity.description || '',
             date: newActivity.date || new Date(),
@@ -126,7 +129,7 @@ export function TravelPlanDetail({ plan, onBack, onEdit, onUpdateActivities }: T
         onUpdateActivities(updatedActivities);
     };
 
-    const groupedActivities = activities.reduce((groups, activity) => {
+    const groupedActivities = (activities || []).reduce((groups, activity) => {
         const dateKey = activity.date.toDateString();
         if (!groups[dateKey]) {
             groups[dateKey] = [];
