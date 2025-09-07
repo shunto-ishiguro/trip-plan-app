@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { TravelPlan, Activity, ViewMode } from '../types/travel';
 import { getUserId } from '@/lib/api/appUsersApi';
 import { addTravelPlanAPI, deleteTravelPlanAPI, getTravelPlanAPI, updateTravelPlanAPI } from '@/lib/api/travelPlansApi';
-import { updateActivity } from '@/lib/api/activitiesApi';
 
 export function useTravelPlan() {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
