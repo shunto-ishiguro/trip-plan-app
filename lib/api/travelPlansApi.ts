@@ -1,5 +1,3 @@
-"use server";
-
 import { supabase } from '../supabaseClient';
 import { DBPlan, TravelPlan } from '../../app/types/travel';
 import { toDBPlan, toTravelPlan } from '../mappers/travelPlanMapper';
@@ -15,7 +13,6 @@ export async function getTravelPlanAPI(userId: string | null): Promise<TravelPla
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
-    //エラーあったらエラーだすよ
     if (error) throw error;
     // API 層で変換
     const travelPlans = (data || [])
@@ -26,45 +23,40 @@ export async function getTravelPlanAPI(userId: string | null): Promise<TravelPla
 }
 
 //新規作成
-// DBPlan 型で保存して、戻り値を TravelPlan 型で返す
-export async function addTravelPlanAPI(plan: Omit<TravelPlan, 'id' | 'createdAt' | 'updatedAt' | 'activities'>): Promise<Omit<TravelPlan, 'activities'> | null> {
-    const dbPlan: DBPlan = toDBPlan(plan);
+export async function addTravelPlanAPI(plan: Omit<TravelPlan, 'id' | 'createdAt' | 'updatedAt' | 'activities'>): Promise<Omit<TravelPlan, 'activities'>> {
     const { data, error } = await supabase
         .from('travel_plans')
-        .insert([{ ...dbPlan, created_at: new Date(), updated_at: new Date() }])
+        .insert([{ ...toDBPlan(plan), created_at: new Date(), updated_at: new Date() }])
         .select();
 
-    if (error || !data?.[0]) {
-        console.error('addTravelPlanAPI エラー', error?.message);
-        return null;
-    }
+    if (error) throw error;
 
-    return toTravelPlan(data[0]);
+    const inserted = (data as DBPlan[])[0]; // 型アサーション
+    const inserted_plan = toTravelPlan(inserted);
+    if (!inserted_plan) throw new Error('DBPlan変換エラー');
+
+    return inserted_plan;
 }
 
 //更新
-export async function updateTravelPlanAPI(id: string, updates: Partial<Omit<TravelPlan, 'activities'>>): Promise<Omit<TravelPlan, 'activities'> | null> {
-    const dbUpdates: Partial<DBPlan> = {
-        ...toDBPlan(updates as any), // camelCase → snake_case に変換
-        updated_at: new Date().toISOString()
-    };
+export async function updateTravelPlanAPI(id: string, updates: Omit<TravelPlan, 'id' | 'createdAt' | 'updatedAt' | 'activities'>): Promise<Omit<TravelPlan, 'activities'>> {
 
     const { data, error } = await supabase
         .from('travel_plans')
-        .update(dbUpdates)
+        .update({ ...toDBPlan(updates), updated_at: new Date().toISOString() })
         .eq('id', id)
         .select();
 
-    if (error || !data?.[0]) {
-        console.error('updateTravelPlanAPI エラー', error?.message);
-        return null;
-    }
+    if (error) throw error;
 
-    return toTravelPlan(data[0]);
+    const updated = (data as DBPlan[])[0]; // 型アサーション
+    const updated_plan = toTravelPlan(updated);
+    if (!updated_plan) throw new Error('DBPlan変換エラー');
+    return updated_plan;
 }
 
 // 削除
-export async function deleteTravelPlanAPI(id: string) {
+export async function deleteTravelPlanAPI(id: string): Promise<void> {
     const { error } = await supabase.from('travel_plans').delete().eq('id', id);
     if (error) throw error;
 }
