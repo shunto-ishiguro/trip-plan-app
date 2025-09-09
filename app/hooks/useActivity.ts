@@ -91,8 +91,10 @@ export function useActivity(plan: TravelPlan, onUpdateActivities: (activities: A
         const target = activities.find(a => a.id === activityId);
         if (!target) return;
 
+        const { id, completed, ...others } = target;
+
         try {
-            const updated = await updateActivityAPI(activityId, { completed: !target.completed });
+            const updated = await updateActivityAPI(activityId, { completed: !completed, ...others });
 
             const updatedActivities = activities.map(activity =>
                 activity.id === activityId ? { ...activity, completed: updated.completed } : activity
@@ -106,8 +108,10 @@ export function useActivity(plan: TravelPlan, onUpdateActivities: (activities: A
 
     /** --- 更新 (任意のフィールド変更用) --- */
     const updateActivity = async (activityId: string, updates: Partial<Activity>) => {
+
+        const { id, ...others } = updates;
         try {
-            const updated = await updateActivityAPI(activityId, updates);
+            const updated = await updateActivityAPI(activityId, others as Omit<Activity, 'id'>);
 
             const updatedActivities = activities.map(activity =>
                 activity.id === activityId ? { ...activity, ...updated } : activity

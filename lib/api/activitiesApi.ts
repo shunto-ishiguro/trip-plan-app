@@ -6,7 +6,7 @@ import { toDBActivity, toActivity } from '../mappers/activityMapper';
 // 取得
 export async function getActivitiesByPlanIdAPI(planId: string): Promise<Activity[]> {
     const { data, error } = await supabase
-        .from('activities') // ここは型パラメータなし
+        .from('activities')
         .select('*')
         .eq('plan_id', planId)
         .order('date', { ascending: true })
@@ -17,7 +17,6 @@ export async function getActivitiesByPlanIdAPI(planId: string): Promise<Activity
     // data は unknown[] 型として返ることがあるので、型アサーションで DBActivity[] にする
     const activitiesDB = data as DBActivity[];
 
-    // DBActivity → Activity に変換
     const activitiesFront = activitiesDB
         .map(d => toActivity(d))
         .filter((a): a is Activity => a !== null);
@@ -27,42 +26,38 @@ export async function getActivitiesByPlanIdAPI(planId: string): Promise<Activity
 
 // 追加
 export async function addActivityAPI(activity: Omit<Activity, 'id'>): Promise<Activity> {
-    const dbActivity = toDBActivity(activity);
     const { data, error } = await supabase
         .from('activities') // 型パラメータ削除
-        .insert([{ ...dbActivity, created_at: new Date(), updated_at: new Date() }])
+        .insert([{ ...toDBActivity(activity), created_at: new Date(), updated_at: new Date() }])
         .select();
 
     if (error) throw error;
 
     const inserted = (data as DBActivity[])[0]; // 型アサーション
-    const act = toActivity(inserted);
-    if (!act) throw new Error('DBActivity変換エラー');
-    return { ...act, plan_id: activity.plan_id };
+    const inserted_activity = toActivity(inserted);
+    if (!inserted_activity) throw new Error('DBActivity変換エラー');
+    return { ...inserted_activity, plan_id: activity.plan_id };
 }
 
 // 更新
-export async function updateActivityAPI(id: string, updates: Partial<Activity>): Promise<Omit<Activity, 'plan_id'>> {
+export async function updateActivityAPI(id: string, updates: Omit<Activity, 'id'>): Promise<Omit<Activity, 'plan_id'>> {
     const { data, error } = await supabase
         .from('activities') // 型パラメータ削除
-        .update({ ...updates, updated_at: new Date() })
+        .update({ ...toDBActivity(updates), updated_at: new Date().toISOString() })
         .eq('id', id)
         .select();
 
     if (error) throw error;
 
     const updated = (data as DBActivity[])[0]; // 型アサーション
-    const act = toActivity(updated);
-    if (!act) throw new Error('DBActivity変換エラー');
-    return act;
+    const updated_activity = toActivity(updated);
+    if (!updated_activity) throw new Error('DBActivity変換エラー');
+    return updated_activity;
 }
 
 // 削除
-export async function deleteActivityAPI(id: string) {
-    const { error } = await supabase
-        .from('activities') // 型パラメータ削除
-        .delete()
-        .eq('id', id);
+export async function deleteActivityAPI(id: string): Promise<void> {
+    const { error } = await supabase.from('activities').delete().eq('id', id);
 
     if (error) throw error;
 }
