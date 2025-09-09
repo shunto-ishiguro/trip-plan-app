@@ -1,4 +1,17 @@
+"use client";
+
 import { supabase } from '../supabaseClient';
+
+// Supabase の古いセッションをリセット
+async function resetSupabaseSession() {
+    try {
+        await supabase.auth.signOut();
+        localStorage.removeItem('supabase.auth.token');
+        console.log('Supabase セッションをリセットしました');
+    } catch (error) {
+        console.error('セッションリセット中にエラー', error);
+    }
+}
 
 //匿名で来た人に番号を割り振る
 //app_user tableのほうでidを一意的に生成することにしているからからのオブジェクトを挿入するだけでいい
@@ -12,7 +25,6 @@ async function createAnonymousUserInDB() {
     return data[0].id; //自動生成されたUUIDを返す
 }
 
-
 function registerUserIdInLocalStorage(userId: string) {
     localStorage.setItem('user_id', userId);
 }
@@ -21,6 +33,8 @@ function registerUserIdInLocalStorage(userId: string) {
 export async function getUserId(): Promise<string> {
     const value = localStorage.getItem("user_id");
     if (!value) {
+        // まず Supabase セッションをリセット
+        await resetSupabaseSession();
         //userが存在しなかったときの処理
         const userId = await createAnonymousUserInDB();
         registerUserIdInLocalStorage(userId);

@@ -58,4 +58,19 @@ export interface DBPlan {
     updated_at?: string
 };
 
+export interface DBActivity {
+    id?: string;           // uuid, 自動生成されるのでオプショナル
+    plan_id: string;       // どのプランに属するか
+    title: string;         // 必須
+    description?: string;  // 任意
+    date?: string;         // 日付文字列（YYYY-MM-DD 形式など）
+    time?: string;         // 時刻文字列（HH:MM 形式など）
+    location?: string;     // 任意
+    cost?: number;         // 任意
+    completed?: boolean;   // デフォルト false
+    category?: string;     // 任意
+    created_at?: string;   // タイムスタンプ文字列、自動生成されるのでオプショナル
+    updated_at?: string;   // タイムスタンプ文字列、自動生成されるのでオプショナル
+}
+
 export type ViewMode = 'list' | 'form' | 'detail';

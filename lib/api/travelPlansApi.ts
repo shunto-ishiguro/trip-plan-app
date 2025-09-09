@@ -1,7 +1,8 @@
+"use server";
+
 import { supabase } from '../supabaseClient';
 import { DBPlan, TravelPlan } from '../../app/types/travel';
 import { toDBPlan, toTravelPlan } from '../mappers/travelPlanMapper';
-//supabaseのプラン情報を取得、追加、更新するやつら
 //このファイルでDBPlan型->TravelPlan型またはTravelPlan型->DBPlan型やっちゃうで
 
 // 一覧取得
@@ -42,10 +43,7 @@ export async function addTravelPlanAPI(plan: Omit<TravelPlan, 'id' | 'createdAt'
 }
 
 //更新
-export async function updateTravelPlanAPI(
-    id: string,
-    updates: Partial<Omit<TravelPlan, 'activities'>>
-): Promise<Omit<TravelPlan, 'activities'> | null> {
+export async function updateTravelPlanAPI(id: string, updates: Partial<Omit<TravelPlan, 'activities'>>): Promise<Omit<TravelPlan, 'activities'> | null> {
     const dbUpdates: Partial<DBPlan> = {
         ...toDBPlan(updates as any), // camelCase → snake_case に変換
         updated_at: new Date().toISOString()

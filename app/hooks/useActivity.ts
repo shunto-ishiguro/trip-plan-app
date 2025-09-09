@@ -1,6 +1,8 @@
 "use client";
-import { useState } from 'react';
-import { Activity, ActivityCategory, TravelPlan } from '../types/travel';
+
+import { useState, useEffect } from 'react';
+import { Activity, TravelPlan } from '../types/travel';
+import { getActivitiesByPlanIdAPI, addActivityAPI, updateActivityAPI, deleteActivityAPI } from '@/lib/api/activitiesApi';
 
 export function useActivity(plan: TravelPlan, onUpdateActivities: (activities: Activity[]) => void) {
     const [activities, setActivities] = useState<Activity[]>(plan.activities || []);
@@ -15,6 +17,27 @@ export function useActivity(plan: TravelPlan, onUpdateActivities: (activities: A
         completed: false,
         category: 'sightseeing'
     });
+
+    const [loading, setLoading] = useState(true);
+
+    /** --- 初期ロード: プランIDからactivitiesを取得 --- */
+    useEffect(() => {
+        const fetchActivities = async () => {
+            if (!plan.id) return;
+            setLoading(true);
+            try {
+                const fetched = await getActivitiesByPlanIdAPI(plan.id);
+                setActivities(fetched);
+                onUpdateActivities(fetched);
+            } catch (e) {
+                console.error('Failed to fetch activities:', e);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchActivities();
+    }, [plan.id, onUpdateActivities]);
 
     const formatDate = (date: Date) => {
         return new Intl.DateTimeFormat('ja-JP', {
@@ -35,52 +58,78 @@ export function useActivity(plan: TravelPlan, onUpdateActivities: (activities: A
         return (activities || []).reduce((total, activity) => total + (activity.cost || 0), 0);
     };
 
-    const addActivity = () => {
+    const addActivity = async () => {
         if (!newActivity.title) return;
 
-        const activity: Activity = {
-            id: Date.now().toString(),
-            plan_id: plan.id,
-            title: newActivity.title,
-            description: newActivity.description || '',
-            date: newActivity.date || new Date(),
-            time: newActivity.time || '',
-            location: newActivity.location || '',
-            cost: newActivity.cost || 0,
-            completed: false,
-            category: newActivity.category as ActivityCategory
-        };
+        try {
+            const savedActivity = await addActivityAPI({
+                ...newActivity,
+                plan_id: plan.id,
+            });
 
-        const updatedActivities = [...activities, activity];
-        setActivities(updatedActivities);
-        onUpdateActivities(updatedActivities);
-        setNewActivity({
-            title: '',
-            description: '',
-            date: new Date(),
-            time: '',
-            location: '',
-            cost: 0,
-            completed: false,
-            category: 'sightseeing'
-        });
-        setIsAddingActivity(false);
+            const updatedActivities = [...activities, savedActivity];
+            setActivities(updatedActivities);
+            onUpdateActivities(updatedActivities);
+
+            setNewActivity({
+                title: '',
+                description: '',
+                date: new Date(),
+                time: '',
+                location: '',
+                cost: 0,
+                completed: false,
+                category: 'sightseeing'
+            });
+            setIsAddingActivity(false);
+        } catch (e) {
+            console.error(e);
+        }
     };
 
-    const toggleActivityComplete = (activityId: string) => {
-        const updatedActivities = activities.map(activity =>
-            activity.id === activityId
-                ? { ...activity, completed: !activity.completed }
-                : activity
-        );
-        setActivities(updatedActivities);
-        onUpdateActivities(updatedActivities);
+    const toggleActivityComplete = async (activityId: string) => {
+        const target = activities.find(a => a.id === activityId);
+        if (!target) return;
+
+        try {
+            const updated = await updateActivityAPI(activityId, { completed: !target.completed });
+
+            const updatedActivities = activities.map(activity =>
+                activity.id === activityId ? { ...activity, completed: updated.completed } : activity
+            );
+            setActivities(updatedActivities);
+            onUpdateActivities(updatedActivities);
+        } catch (e) {
+            console.error(e);
+        }
     };
 
-    const deleteActivity = (activityId: string) => {
-        const updatedActivities = activities.filter(activity => activity.id !== activityId);
-        setActivities(updatedActivities);
-        onUpdateActivities(updatedActivities);
+    /** --- 更新 (任意のフィールド変更用) --- */
+    const updateActivity = async (activityId: string, updates: Partial<Activity>) => {
+        try {
+            const updated = await updateActivityAPI(activityId, updates);
+
+            const updatedActivities = activities.map(activity =>
+                activity.id === activityId ? { ...activity, ...updated } : activity
+            );
+            setActivities(updatedActivities);
+            onUpdateActivities(updatedActivities);
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    /** --- 削除 (delete API 使用) --- */
+    const deleteActivity = async (activityId: string) => {
+        try {
+            await deleteActivityAPI(activityId);
+
+            const updatedActivities = activities.filter(activity => activity.id !== activityId);
+            setActivities(updatedActivities);
+            onUpdateActivities(updatedActivities);
+        } catch (e) {
+            console.error(e);
+        }
     };
 
     const groupedActivities = (activities || []).reduce((groups, activity) => {
