@@ -1,9 +1,7 @@
-// lib/supabaseClient.ts
+// lib/supabaseServer.ts
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 
-//基本的にいじらないところ。おまじない
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabaseServerClient = () => {
+    return createServerComponentClient({ cookies })
+}
