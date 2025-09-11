@@ -1,10 +1,11 @@
 
-import { supabase } from '../supabaseClient';
+import { supabaseServerClient } from '../supabaseClient';
 import { Activity, DBActivity } from '../../app/types/travel';
 import { toDBActivity, toActivity } from '../mappers/activityMapper';
 
 // 取得
 export async function getActivitiesByPlanIdAPI(planId: string): Promise<Activity[]> {
+    const supabase = supabaseServerClient();
     const { data, error } = await supabase
         .from('activities')
         .select('*')
@@ -26,6 +27,7 @@ export async function getActivitiesByPlanIdAPI(planId: string): Promise<Activity
 
 // 追加
 export async function addActivityAPI(activity: Omit<Activity, 'id'>): Promise<Activity> {
+    const supabase = supabaseServerClient();
     const { data, error } = await supabase
         .from('activities') // 型パラメータ削除
         .insert([{ ...toDBActivity(activity), created_at: new Date(), updated_at: new Date() }])
@@ -41,6 +43,7 @@ export async function addActivityAPI(activity: Omit<Activity, 'id'>): Promise<Ac
 
 // 更新
 export async function updateActivityAPI(id: string, updates: Omit<Activity, 'id'>): Promise<Omit<Activity, 'plan_id'>> {
+    const supabase = supabaseServerClient();
     const { data, error } = await supabase
         .from('activities') // 型パラメータ削除
         .update({ ...toDBActivity(updates), updated_at: new Date().toISOString() })
@@ -57,6 +60,7 @@ export async function updateActivityAPI(id: string, updates: Omit<Activity, 'id'
 
 // 削除
 export async function deleteActivityAPI(id: string): Promise<void> {
+    const supabase = supabaseServerClient();
     const { error } = await supabase.from('activities').delete().eq('id', id);
 
     if (error) throw error;
