@@ -1,10 +1,11 @@
-import { supabase } from '../supabaseClient';
+import { supabaseServerClient } from '../supabaseServer';
 import { DBPlan, TravelPlan } from '../../app/types/travel';
 import { toDBPlan, toTravelPlan } from '../mappers/travelPlanMapper';
 //このファイルでDBPlan型->TravelPlan型またはTravelPlan型->DBPlan型やっちゃうで
 
 // 一覧取得
 export async function getTravelPlanAPI(userId: string | null): Promise<TravelPlan[]> {
+    const supabase = supabaseServerClient();
     if (userId === null) return [];
     //dataにデータベースからとってきたものをcreated_atの小さい順でもってくる
     const { data, error } = await supabase
@@ -24,6 +25,7 @@ export async function getTravelPlanAPI(userId: string | null): Promise<TravelPla
 
 //新規作成
 export async function addTravelPlanAPI(plan: Omit<TravelPlan, 'id' | 'createdAt' | 'updatedAt' | 'activities'>): Promise<Omit<TravelPlan, 'activities'>> {
+    const supabase = supabaseServerClient();
     const { data, error } = await supabase
         .from('travel_plans')
         .insert([{ ...toDBPlan(plan), created_at: new Date(), updated_at: new Date() }])
@@ -40,6 +42,7 @@ export async function addTravelPlanAPI(plan: Omit<TravelPlan, 'id' | 'createdAt'
 
 //更新
 export async function updateTravelPlanAPI(id: string, updates: Omit<TravelPlan, 'id' | 'createdAt' | 'updatedAt' | 'activities'>): Promise<Omit<TravelPlan, 'activities'>> {
+    const supabase = supabaseServerClient();
 
     const { data, error } = await supabase
         .from('travel_plans')
@@ -57,6 +60,7 @@ export async function updateTravelPlanAPI(id: string, updates: Omit<TravelPlan, 
 
 // 削除
 export async function deleteTravelPlanAPI(id: string): Promise<void> {
+    const supabase = supabaseServerClient();
     const { error } = await supabase.from('travel_plans').delete().eq('id', id);
     if (error) throw error;
 }

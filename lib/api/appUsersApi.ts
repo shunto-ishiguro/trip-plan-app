@@ -1,10 +1,11 @@
 "use client";
 
-import { supabase } from '../supabaseClient';
+import { supabaseServerClient } from '../supabaseServer';
 
 // Supabase の古いセッションをリセット
 async function resetSupabaseSession() {
     try {
+        const supabase = supabaseServerClient();
         await supabase.auth.signOut();
         localStorage.removeItem('supabase.auth.token');
         console.log('Supabase セッションをリセットしました');
@@ -16,6 +17,7 @@ async function resetSupabaseSession() {
 //匿名で来た人に番号を割り振る
 //app_user tableのほうでidを一意的に生成することにしているからからのオブジェクトを挿入するだけでいい
 async function createAnonymousUserInDB() {
+    const supabase = supabaseServerClient();
     const { data, error } = await supabase
         .from('app_users')
         .insert([{}])

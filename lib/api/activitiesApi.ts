@@ -1,5 +1,5 @@
 
-import { supabaseServerClient } from '../supabaseClient';
+import { supabaseServerClient } from '../supabaseServer';
 import { Activity, DBActivity } from '../../app/types/travel';
 import { toDBActivity, toActivity } from '../mappers/activityMapper';
 
