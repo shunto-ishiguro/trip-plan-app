@@ -1,3 +1,5 @@
+//app/componetnts/TravelPlanDetail.tsx
+
 import { TravelPlan, Activity, ActivityCategory } from '../types/travel';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';

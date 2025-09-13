@@ -1,9 +1,8 @@
-import { DBPlan, TravelPlan } from '../../app/types/travel';
+import { DBTravelPlan, TravelPlan } from '../../app/types/travel';
 
 //TravelPlan型からデータベースのテーブルに寄せたDBPlan型に変更する
-export function toDBPlan(plan: Omit<TravelPlan, 'id' | 'createdAt' | 'updatedAt' | 'activities'>): DBPlan {
+export function toDBTravelPlan(plan: Omit<TravelPlan, 'id' | 'createdAt' | 'updatedAt' | 'activities'>): DBTravelPlan {
     return {
-        user_id: plan.user_id,
         title: plan.title,
         destination: plan.destination,
         start_date: plan.startDate.toISOString(),
@@ -15,11 +14,10 @@ export function toDBPlan(plan: Omit<TravelPlan, 'id' | 'createdAt' | 'updatedAt'
     };
 }
 
-export function toTravelPlan(plan: DBPlan): Omit<TravelPlan, 'activities'> | null {
+export function toTravelPlan(plan: DBTravelPlan): Omit<TravelPlan, 'activities'> | null {
     if (plan.id && plan.created_at && plan.updated_at) {
         return {
             id: plan.id,
-            user_id: plan.user_id,
             title: plan.title,
             destination: plan.destination,
             startDate: new Date(plan.start_date),

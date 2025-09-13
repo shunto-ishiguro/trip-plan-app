@@ -13,7 +13,7 @@ import { cn } from './ui/utils';
 
 interface TravelPlanFormProps {
     plan?: TravelPlan;
-    onSubmit: (plan: Omit<TravelPlan, 'id' | 'user_id' | 'createdAt' | 'updatedAt'>) => void;
+    onSubmit: (plan: Omit<TravelPlan, 'id' | 'createdAt' | 'updatedAt'>) => void;
     onCancel: () => void;
 }
 
