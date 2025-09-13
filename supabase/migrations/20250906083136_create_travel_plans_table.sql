@@ -1,6 +1,6 @@
 create table travel_plans (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null, -- 外部キー制約は削除
+  --user_id uuid not null, -- 外部キー制約は削除
   title text not null,
   destination text,
   start_date date,
