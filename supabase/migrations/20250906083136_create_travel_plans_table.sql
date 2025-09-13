@@ -1,14 +1,6 @@
--- app_users テーブル
--- ここで一意的なidが自動生成されることを書いている
-create table app_users (
-  id uuid primary key default gen_random_uuid(),
-  created_at timestamp with time zone default now()
-);
-
--- travel_plans テーブル
 create table travel_plans (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid references app_users(id) on delete cascade,
+  user_id uuid not null, -- 外部キー制約は削除
   title text not null,
   destination text,
   start_date date,
@@ -21,7 +13,6 @@ create table travel_plans (
   updated_at timestamp with time zone default now()
 );
 
--- activities テーブル
 create table activities (
   id uuid primary key default gen_random_uuid(),
   plan_id uuid references travel_plans(id) on delete cascade,
