@@ -2,15 +2,16 @@
 
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "../../lib/supabase/server";
 import { Activity, DBActivity } from "../types/travel";
 import { toDBActivity, toActivity } from '../../lib/mappers/activityMapper';
 
-export async function getActivityAPI(): Promise<Activity[]> {
+export async function getActivityAPI(planId: string): Promise<Activity[]> {
     const supabase = await createClient();
     const { data, error } = await supabase
         .from("activities")
         .select("*")
+        .eq("plan_id", planId)  // ←ここでプランを絞る
         .order("date", { ascending: true });
 
     if (error) throw new Error(error.message);
@@ -24,11 +25,11 @@ export async function getActivityAPI(): Promise<Activity[]> {
     return activities;
 }
 
-export async function addActivityAPI(activity: Omit<Activity, "id">): Promise<Activity> {
+export async function addActivityAPI(planId: string, activity: Omit<Activity, "id">): Promise<Activity> {
     const supabase = await createClient();
     const { data, error } = await supabase
         .from("activities")
-        .insert([activity])
+        .insert([{ ...activity, plan_id: planId }])
         .select("*")
         .single();
 

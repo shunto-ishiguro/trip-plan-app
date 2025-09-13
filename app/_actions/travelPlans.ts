@@ -37,7 +37,7 @@ export async function addTravelPlanAPI(plan: Omit<TravelPlan, 'id' | 'createdAt'
 
     if (error) throw new Error(error.message);
 
-    const inserted = (data as DBTravelPlan[])[0]; // 型アサーション
+    const inserted = data as DBTravelPlan;
     const inserted_plan = toTravelPlan(inserted);
     if (!inserted_plan) throw new Error('DBTravelPlan変換エラー');
 
@@ -57,7 +57,7 @@ export async function updateTravelPlanAPI(planId: string, updates: Omit<TravelPl
 
     if (error) throw new Error(error.message);
 
-    const updated = (data as DBTravelPlan[])[0]; // 型アサーション
+    const updated = data as DBTravelPlan;
     const updated_plan = toTravelPlan(updated);
     if (!updated_plan) throw new Error('DBTravelPlan変換エラー');
     return updated_plan;

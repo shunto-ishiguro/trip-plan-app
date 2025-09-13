@@ -22,17 +22,19 @@ export function useActivity(plan: TravelPlan, onUpdateActivities: (activities: A
 
     useEffect(() => {
 
-        getActivityAPI()
+        if (!plan.id) return; // plan がまだロードされていない場合は何もしない
+
+        getActivityAPI(plan.id)
             .then(fetched => {
                 setActivities(fetched);
                 onUpdateActivities(fetched);
             })
             .catch(console.error)
-    }, [onUpdateActivities]);
+    }, [plan.id, onUpdateActivities]);
 
     const addActivity = async () => {
         if (!newActivity.title) return;
-        const saved = await addActivityAPI(newActivity);
+        const saved = await addActivityAPI(plan.id, newActivity);
         const updated = [...activities, saved];
         setActivities(updated);
         onUpdateActivities(updated);
