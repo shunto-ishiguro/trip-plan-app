@@ -53,7 +53,7 @@ const categoryColors: Record<ActivityCategory, string> = {
 export function TravelPlanDetail({ plan, onBack, onEdit, onUpdateActivities }: TravelPlanDetailProps) {
 
     const {
-        activities, setActivities,
+        activities,
         isAddingActivity, setIsAddingActivity,
         newActivity, setNewActivity,
         formatDate,
@@ -203,7 +203,7 @@ export function TravelPlanDetail({ plan, onBack, onEdit, onUpdateActivities }: T
                                             type="text"
                                             onChange={(e) => {
                                                 const val = e.target.value;
-                                                if(/^d*$/.test(val)){
+                                                if (/^d*$/.test(val)) {
                                                     setNewActivity({ ...newActivity, cost: Number(e.target.value) });
                                                 }
                                             }}
