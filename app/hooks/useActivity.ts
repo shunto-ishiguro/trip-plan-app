@@ -30,7 +30,7 @@ export function useActivity(plan: TravelPlan, onUpdateActivities: (activities: A
                 onUpdateActivities(fetched);
             })
             .catch(console.error)
-    }, [plan.id, onUpdateActivities]);
+    }, [plan.id]);
 
     const addActivity = async () => {
         if (!newActivity.title) return;
