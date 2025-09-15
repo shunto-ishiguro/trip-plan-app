@@ -59,12 +59,12 @@ export async function middleware(request: NextRequest) {
     const { data: { session } } = await supabase.auth.getSession()
 
     // ログインしていない、かつログインページ以外にアクセスした場合
-    if (!session && request.nextUrl.pathname !== '/login') {
-        return NextResponse.redirect(new URL('/login', request.url))
+    if (!session && request.nextUrl.pathname !== '/') {
+        return NextResponse.redirect(new URL('/', request.url))
     }
 
     // ログイン済み、かつログインページにアクセスした場合
-    if (session && request.nextUrl.pathname === '/login') {
+    if (session && request.nextUrl.pathname === '/') {
         return NextResponse.redirect(new URL('/', request.url))
     }
 
