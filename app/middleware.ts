@@ -19,6 +19,7 @@ export async function middleware(request: NextRequest) {
                     return request.cookies.get(name)?.value
                 },
                 set(name: string, value: string, options: CookieOptions) {
+                    // 🔽 ここ変更（`request.cookies.set` を追加してから response を再生成 → response.cookies.set）
                     request.cookies.set({
                         name,
                         value,
@@ -36,6 +37,7 @@ export async function middleware(request: NextRequest) {
                     })
                 },
                 remove(name: string, options: CookieOptions) {
+                    // 🔽 ここ変更（`request.cookies.set` を追加してから response を再生成 → response.cookies.set）
                     request.cookies.set({
                         name,
                         value: '',
@@ -65,6 +67,7 @@ export async function middleware(request: NextRequest) {
 
     // ログイン済み、かつログインページにアクセスした場合
     if (session && request.nextUrl.pathname === '/') {
+        // 🔽 ここたぶん変更点（本来はログイン後ページへリダイレクトするはずだけど、今は "/" に固定されてる）
         return NextResponse.redirect(new URL('/', request.url))
     }
 
