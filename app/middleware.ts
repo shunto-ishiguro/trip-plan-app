@@ -58,7 +58,10 @@ export async function middleware(request: NextRequest) {
         }
     )
 
-    const { data: { session } } = await supabase.auth.getSession()
+    const { data: { session }, error } = await supabase.auth.getSession()
+
+    console.log("session in middleware:", session)
+    console.log("error in middleware:", error)
 
     // ログインしていない、かつログインページ以外にアクセスした場合
     if (!session && request.nextUrl.pathname !== '/') {
