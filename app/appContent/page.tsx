@@ -13,8 +13,8 @@ export default function AppContent() {
 
     const { viewMode, setViewMode,
         editingPlan, setEditingPlan,
-        selectedPlan, setSelectedPlanId,
-        plans, setPlans,
+        selectedPlan,
+        plans,
         handleCreatePlan,
         handleDeletePlan,
         handleEditPlan,
