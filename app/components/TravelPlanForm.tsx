@@ -144,9 +144,13 @@ export function TravelPlanForm({ plan, onSubmit, onCancel }: TravelPlanFormProps
                             <Label htmlFor="budget">予算</Label>
                             <Input
                                 id="budget"
-                                type="number"
-                                value={formData.budget}
-                                onChange={(e) => setFormData({ ...formData, budget: Number(e.target.value) })}
+                                type="text"
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if(/^d*$/.test(val)){
+                                        setFormData({ ...formData, budget: Number(e.target.value) });
+                                    } 
+                                }}
                                 placeholder="100000"
                                 min="0"
                             />
