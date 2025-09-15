@@ -6,3 +6,6 @@
 - react
 - next.js
 - supabase
+- Vercel
+## 開発の行程
+- creat-next-appでApp Routerとして

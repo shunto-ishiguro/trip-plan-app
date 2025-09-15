@@ -1,6 +1,5 @@
 export interface TravelPlan {
     id: string;
-    user_id: string;
     title: string;
     destination: string;
     startDate: Date;
@@ -16,7 +15,6 @@ export interface TravelPlan {
 
 export interface Activity {
     id: string;
-    plan_id: string;
     title: string;
     description?: string;
     date: Date;
@@ -43,9 +41,8 @@ export interface BudgetItem {
     description: string;
 }
 
-export interface DBPlan {
+export interface DBTravelPlan {
     id?: string,
-    user_id: string,
     title: string,
     destination: string,
     start_date: string,
@@ -60,7 +57,6 @@ export interface DBPlan {
 
 export interface DBActivity {
     id?: string;           // uuid, 自動生成されるのでオプショナル
-    plan_id: string;       // どのプランに属するか
     title: string;         // 必須
     description?: string;  // 任意
     date?: string;         // 日付文字列（YYYY-MM-DD 形式など）

@@ -1,43 +1,63 @@
+//app/hooks/useActivity.ts
+
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Activity, TravelPlan } from '../types/travel';
-import { getActivitiesByPlanIdAPI, addActivityAPI, updateActivityAPI, deleteActivityAPI } from '@/lib/api/activitiesApi';
+import { useState, useEffect } from "react";
+import { Activity, TravelPlan } from "../types/travel";
+import { getActivityAPI, addActivityAPI, updateActivityAPI, deleteActivityAPI } from "../_actions/activities";
 
 export function useActivity(plan: TravelPlan, onUpdateActivities: (activities: Activity[]) => void) {
     const [activities, setActivities] = useState<Activity[]>(plan.activities || []);
     const [isAddingActivity, setIsAddingActivity] = useState(false);
-    const [newActivity, setNewActivity] = useState<Omit<Activity, 'id' | 'plan_id'>>({
-        title: '',
-        description: '',
+    const [newActivity, setNewActivity] = useState<Omit<Activity, "id">>({
+        title: "",
+        description: "",
         date: new Date(),
-        time: '',
-        location: '',
+        time: "",
+        location: "",
         cost: 0,
         completed: false,
-        category: 'sightseeing'
+        category: "sightseeing",
     });
 
-    const [loading, setLoading] = useState(true);
-
-    /** --- 初期ロード: プランIDからactivitiesを取得 --- */
     useEffect(() => {
-        const fetchActivities = async () => {
-            if (!plan.id) return;
-            setLoading(true);
-            try {
-                const fetched = await getActivitiesByPlanIdAPI(plan.id);
+
+        if (!plan.id) return; // plan がまだロードされていない場合は何もしない
+
+        getActivityAPI(plan.id)
+            .then(fetched => {
                 setActivities(fetched);
                 onUpdateActivities(fetched);
-            } catch (e) {
-                console.error('Failed to fetch activities:', e);
-            } finally {
-                setLoading(false);
-            }
-        };
+            })
+            .catch(console.error)
+    }, [plan.id]);
 
-        fetchActivities();
-    }, [plan.id, onUpdateActivities]);
+    const addActivity = async () => {
+        if (!newActivity.title) return;
+        const saved = await addActivityAPI(plan.id, newActivity);
+        const updated = [...activities, saved];
+        setActivities(updated);
+        onUpdateActivities(updated);
+        setNewActivity({ title: "", description: "", date: new Date(), time: "", location: "", cost: 0, completed: false, category: "sightseeing" });
+        setIsAddingActivity(false);
+    };
+
+    const toggleActivityComplete = async (activityId: string) => {
+        const target = activities.find(a => a.id === activityId);
+        if (!target) return;
+        const { id, completed, ...others } = target;
+        const updated = await updateActivityAPI(activityId, { completed: !target.completed, ...others });
+        const newList = activities.map(a => a.id === activityId ? { ...a, completed: updated.completed } : a);
+        setActivities(newList);
+        onUpdateActivities(newList);
+    };
+
+    const deleteActivity = async (activityId: string) => {
+        await deleteActivityAPI(activityId);
+        const newList = activities.filter(a => a.id !== activityId);
+        setActivities(newList);
+        onUpdateActivities(newList);
+    };
 
     const formatDate = (date: Date) => {
         return new Intl.DateTimeFormat('ja-JP', {
@@ -58,90 +78,10 @@ export function useActivity(plan: TravelPlan, onUpdateActivities: (activities: A
         return (activities || []).reduce((total, activity) => total + (activity.cost || 0), 0);
     };
 
-    const addActivity = async () => {
-        if (!newActivity.title) return;
-
-        try {
-            const savedActivity = await addActivityAPI({
-                ...newActivity,
-                plan_id: plan.id,
-            });
-
-            const updatedActivities = [...activities, savedActivity];
-            setActivities(updatedActivities);
-            onUpdateActivities(updatedActivities);
-
-            setNewActivity({
-                title: '',
-                description: '',
-                date: new Date(),
-                time: '',
-                location: '',
-                cost: 0,
-                completed: false,
-                category: 'sightseeing'
-            });
-            setIsAddingActivity(false);
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
-    const toggleActivityComplete = async (activityId: string) => {
-        const target = activities.find(a => a.id === activityId);
-        if (!target) return;
-
-        const { id, completed, ...others } = target;
-
-        try {
-            const updated = await updateActivityAPI(activityId, { completed: !completed, ...others });
-
-            const updatedActivities = activities.map(activity =>
-                activity.id === activityId ? { ...activity, completed: updated.completed } : activity
-            );
-            setActivities(updatedActivities);
-            onUpdateActivities(updatedActivities);
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
-    /** --- 更新 (任意のフィールド変更用) --- */
-    const updateActivity = async (activityId: string, updates: Partial<Activity>) => {
-
-        const { id, ...others } = updates;
-        try {
-            const updated = await updateActivityAPI(activityId, others as Omit<Activity, 'id'>);
-
-            const updatedActivities = activities.map(activity =>
-                activity.id === activityId ? { ...activity, ...updated } : activity
-            );
-            setActivities(updatedActivities);
-            onUpdateActivities(updatedActivities);
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
-    /** --- 削除 (delete API 使用) --- */
-    const deleteActivity = async (activityId: string) => {
-        try {
-            await deleteActivityAPI(activityId);
-
-            const updatedActivities = activities.filter(activity => activity.id !== activityId);
-            setActivities(updatedActivities);
-            onUpdateActivities(updatedActivities);
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
-    const groupedActivities = (activities || []).reduce((groups, activity) => {
-        const dateKey = activity.date.toDateString();
-        if (!groups[dateKey]) {
-            groups[dateKey] = [];
-        }
-        groups[dateKey].push(activity);
+    const groupedActivities = activities.reduce((groups, activity) => {
+        const key = activity.date.toDateString();
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(activity);
         return groups;
     }, {} as Record<string, Activity[]>);
 

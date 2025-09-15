@@ -1,8 +1,9 @@
+//app/hooks/useTravelPlan.ts
+
 "use client";
 import { useState, useEffect } from 'react';
 import { TravelPlan, Activity, ViewMode } from '../types/travel';
-import { getUserId } from '@/lib/api/appUsersApi';
-import { addTravelPlanAPI, deleteTravelPlanAPI, getTravelPlanAPI, updateTravelPlanAPI } from '@/lib/api/travelPlansApi';
+import { getTravelPlanAPI, addTravelPlanAPI, deleteTravelPlanAPI, updateTravelPlanAPI } from '../_actions/travelPlans';
 
 export function useTravelPlan() {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
@@ -10,87 +11,32 @@ export function useTravelPlan() {
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [plans, setPlans] = useState<TravelPlan[]>([]);
 
-  //カスタムフック内での非同期処理はuseEffectに書き込まないとだめよ
-  //Reactは同期処理に重きを置いているから、非同期処理は分離しないとだめらしい
-  const [userId, setUserId] = useState<string | null>(null);
-
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const id = await getUserId();
-        setUserId(id);
-      }
-      catch (e) {
-        console.error('ユーザー情報取得に失敗:', e);
-      }
-    }
 
-    fetchUser();
-
+    getTravelPlanAPI().then(setPlans).catch(console.error);
   }, []);
 
-  useEffect(() => {
-    if (!userId) return;
-    const getPlan = async () => {
-      try {
-        console.log(userId);
-        const travelPlans = await getTravelPlanAPI(userId); // ここで既に TravelPlan[]
-        setPlans(travelPlans);
-      }
-      catch (e) {
-        console.error(e);
-      }
-    }
 
-    getPlan();
-
-  }, [userId]);
-
-  const handleCreatePlan = async (planData: Omit<TravelPlan, 'user_id' | 'id' | 'createdAt' | 'updatedAt'>) => {
-    try {
-      if (!userId) throw new Error('userIdがnullです');
-
-      // activities を分離
-      const { activities, ...travelPlanWithoutActivities } = planData;
-
-      // API 呼び出し
-      const newPlan = await addTravelPlanAPI({ ...travelPlanWithoutActivities, user_id: userId });
-
-      if (!newPlan) throw new Error('新規プランの作成に失敗しました');
-
-      // activities をマージして完全な TravelPlan を作る
-      const completePlan: TravelPlan = { ...newPlan, activities };
-
-      setPlans([...plans, completePlan]);
-      setViewMode('list');
-    } catch (error) {
-      console.error('handleCreatePlan エラー:', error);
-    }
+  const handleCreatePlan = async (planData: Omit<TravelPlan, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const { activities, ...travelPlanWithoutActivities } = planData;
+    const newPlan = await addTravelPlanAPI(travelPlanWithoutActivities);
+    setPlans([...plans, { ...newPlan, activities }]);
+    setViewMode('list');
   };
 
-  const handleUpdatePlan = async (planData: Omit<TravelPlan, 'id' | 'user_id' | 'createdAt' | 'updatedAt'>) => {
+  const handleUpdatePlan = async (planData: Omit<TravelPlan, 'id' | 'createdAt' | 'updatedAt'>) => {
     if (!editingPlan) return;
-
-    // activities を退避
     const { activities, ...planWithoutActivities } = planData;
-
-    // API 呼び出し
-    const updated = await updateTravelPlanAPI(editingPlan.id, { ...planWithoutActivities, user_id: editingPlan.user_id });
-
-    if (updated) {
-      // activities を再マージして UI 側の TravelPlan を更新
-      const completePlan: TravelPlan = { ...updated, activities };
-
-      setPlans(plans.map(plan => plan.id === editingPlan.id ? completePlan : plan));
-      setEditingPlan(null);
-      setViewMode('list');
-    }
+    const updated = await updateTravelPlanAPI(editingPlan.id, planWithoutActivities);
+    if (updated) setPlans(plans.map(p => p.id === editingPlan.id ? { ...updated, activities } : p));
+    setEditingPlan(null);
+    setViewMode('list');
   };
 
   const handleDeletePlan = async (planId: string) => {
     if (confirm('この旅行プランを削除しますか？')) {
       await deleteTravelPlanAPI(planId);
-      setPlans(plans.filter(plan => plan.id !== planId));
+      setPlans(plans.filter(p => p.id !== planId));
     }
   };
 

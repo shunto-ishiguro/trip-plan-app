@@ -1,3 +1,5 @@
+//app/componetnts/TravelPlanDetail.tsx
+
 import { TravelPlan, Activity, ActivityCategory } from '../types/travel';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
@@ -51,7 +53,7 @@ const categoryColors: Record<ActivityCategory, string> = {
 export function TravelPlanDetail({ plan, onBack, onEdit, onUpdateActivities }: TravelPlanDetailProps) {
 
     const {
-        activities, setActivities,
+        activities,
         isAddingActivity, setIsAddingActivity,
         newActivity, setNewActivity,
         formatDate,
@@ -198,9 +200,13 @@ export function TravelPlanDetail({ plan, onBack, onEdit, onUpdateActivities }: T
                                         <Label htmlFor="activity-cost">費用</Label>
                                         <Input
                                             id="activity-cost"
-                                            type="number"
-                                            value={newActivity.cost}
-                                            onChange={(e) => setNewActivity({ ...newActivity, cost: Number(e.target.value) })}
+                                            type="text"
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                if (/^d*$/.test(val)) {
+                                                    setNewActivity({ ...newActivity, cost: Number(e.target.value) });
+                                                }
+                                            }}
                                             placeholder="0"
                                             min="0"
                                         />

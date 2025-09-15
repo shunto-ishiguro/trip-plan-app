@@ -5,15 +5,11 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Calendar } from './ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { CalendarIcon } from 'lucide-react';
-import { cn } from './ui/utils';
 
 interface TravelPlanFormProps {
     plan?: TravelPlan;
-    onSubmit: (plan: Omit<TravelPlan, 'id' | 'user_id' | 'createdAt' | 'updatedAt'>) => void;
+    onSubmit: (plan: Omit<TravelPlan, 'id' | 'createdAt' | 'updatedAt'>) => void;
     onCancel: () => void;
 }
 
@@ -30,20 +26,9 @@ export function TravelPlanForm({ plan, onSubmit, onCancel }: TravelPlanFormProps
         activities: plan?.activities || []
     });
 
-    const [startDateOpen, setStartDateOpen] = useState(false);
-    const [endDateOpen, setEndDateOpen] = useState(false);
-
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onSubmit(formData);
-    };
-
-    const formatDate = (date: Date) => {
-        return new Intl.DateTimeFormat('ja-JP', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        }).format(date);
     };
 
     return (
@@ -77,65 +62,25 @@ export function TravelPlanForm({ plan, onSubmit, onCancel }: TravelPlanFormProps
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label>開始日</Label>
-                            <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        className={cn(
-                                            "w-full justify-start text-left",
-                                            !formData.startDate && "text-muted-foreground"
-                                        )}
-                                    >
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {formData.startDate ? formatDate(formData.startDate) : "日付を選択"}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
-                                    <Calendar
-                                        mode="single"
-                                        selected={formData.startDate}
-                                        onSelect={(date) => {
-                                            if (date) {
-                                                setFormData({ ...formData, startDate: date });
-                                                setStartDateOpen(false);
-                                            }
-                                        }}
-                                        initialFocus
-                                    />
-                                </PopoverContent>
-                            </Popover>
+                            <Label htmlFor="startDate">開始日</Label>
+                            {/* Radix UI Calendar をやめてブラウザ標準の input type="date" に変更 */}
+                            <Input
+                                id="startDate"
+                                type="date"
+                                value={formData.startDate.toISOString().split('T')[0]}
+                                onChange={(e) => setFormData({ ...formData, startDate: new Date(e.target.value) })}
+                            />
                         </div>
 
                         <div className="space-y-2">
-                            <Label>終了日</Label>
-                            <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        className={cn(
-                                            "w-full justify-start text-left",
-                                            !formData.endDate && "text-muted-foreground"
-                                        )}
-                                    >
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {formData.endDate ? formatDate(formData.endDate) : "日付を選択"}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
-                                    <Calendar
-                                        mode="single"
-                                        selected={formData.endDate}
-                                        onSelect={(date) => {
-                                            if (date) {
-                                                setFormData({ ...formData, endDate: date });
-                                                setEndDateOpen(false);
-                                            }
-                                        }}
-                                        initialFocus
-                                    />
-                                </PopoverContent>
-                            </Popover>
+                            <Label htmlFor="endDate">終了日</Label>
+                            {/* Radix UI Calendar をやめてブラウザ標準の input type="date" に変更 */}
+                            <Input
+                                id="endDate"
+                                type="date"
+                                value={formData.endDate.toISOString().split('T')[0]}
+                                onChange={(e) => setFormData({ ...formData, endDate: new Date(e.target.value) })}
+                            />
                         </div>
                     </div>
 
@@ -144,9 +89,13 @@ export function TravelPlanForm({ plan, onSubmit, onCancel }: TravelPlanFormProps
                             <Label htmlFor="budget">予算</Label>
                             <Input
                                 id="budget"
-                                type="number"
-                                value={formData.budget}
-                                onChange={(e) => setFormData({ ...formData, budget: Number(e.target.value) })}
+                                type="text"
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if(/^d*$/.test(val)){
+                                        setFormData({ ...formData, budget: Number(e.target.value) });
+                                    } 
+                                }}
                                 placeholder="100000"
                                 min="0"
                             />

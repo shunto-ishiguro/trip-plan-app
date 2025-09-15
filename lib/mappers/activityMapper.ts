@@ -3,7 +3,6 @@ import { DBActivity, Activity, ActivityCategory } from '../../app/types/travel';
 // Activity型からDBActivity型に変換（DB挿入用）
 export function toDBActivity(activity: Omit<Activity, 'id' | 'createdAt' | 'updatedAt'>): DBActivity {
     return {
-        plan_id: activity.plan_id,
         title: activity.title,
         description: activity.description,
         date: activity.date ? activity.date.toISOString().split('T')[0] : undefined, // YYYY-MM-DD 形式
@@ -15,7 +14,7 @@ export function toDBActivity(activity: Omit<Activity, 'id' | 'createdAt' | 'upda
     };
 }
 
-export function toActivity(dbActivity: DBActivity): Omit<Activity, 'plan_id'> | null {
+export function toActivity(dbActivity: DBActivity): Activity | null {
     if (!dbActivity.id || !dbActivity.created_at || !dbActivity.updated_at) {
         console.error("toActivityでDBActivityが一部nullです");
         return null;
