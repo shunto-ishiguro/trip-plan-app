@@ -17,6 +17,8 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "noUnusedLocals": true, // ← 追加
+    "noUnusedParameters": true, // ← 追加
     "plugins": [
       {
         "name": "next"
