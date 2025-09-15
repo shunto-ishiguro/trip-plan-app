@@ -37,12 +37,6 @@ export default function Page() {
       >
         Googleでログイン
       </button>
-      <button
-        onClick={() => handleLogin("github")}
-        className="bg-gray-800 text-white px-4 py-2 rounded"
-      >
-        GitHubでログイン
-      </button>
       {loading && <p className="mt-4 text-gray-500">リダイレクト中…</p>}
     </div>
   );
