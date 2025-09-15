@@ -200,9 +200,13 @@ export function TravelPlanDetail({ plan, onBack, onEdit, onUpdateActivities }: T
                                         <Label htmlFor="activity-cost">費用</Label>
                                         <Input
                                             id="activity-cost"
-                                            type="number"
-                                            value={newActivity.cost}
-                                            onChange={(e) => setNewActivity({ ...newActivity, cost: Number(e.target.value) })}
+                                            type="text"
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                if(/^d*$/.test(val)){
+                                                    setNewActivity({ ...newActivity, cost: Number(e.target.value) });
+                                                }
+                                            }}
                                             placeholder="0"
                                             min="0"
                                         />
