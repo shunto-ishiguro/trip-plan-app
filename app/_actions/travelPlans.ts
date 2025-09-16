@@ -24,7 +24,7 @@ export async function getTravelPlanAPI(): Promise<TravelPlan[]> {
 
     const { data, error } = await supabase
         .from("travel_plans")
-        .select("*, activities(*)")
+        .select("id, title, destination, start_date, end_date, description, image_url, budget, currency, created_at, updated_at, activities(id, title, description, date, time, location, cost, completed, category, created_at, updated_at)")
         .eq("user_id", userId) // ← ユーザーごとの取得
         .order("created_at", { ascending: false });
 
