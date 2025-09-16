@@ -6,9 +6,13 @@ import { createClient } from "@/lib/supabase/server";
 import { TravelPlan, DBTravelPlan } from "../types/travel";
 import { toTravelPlan, toDBTravelPlan } from "../../lib/mappers/travelPlanMapper";
 
-async function getCurrentUserId() {
-    const supabase = await createClient(); // サーバー用
-    const { data: { user }, error } = await supabase.auth.getUser();
+type SupabaseClientType = Awaited<ReturnType<typeof createClient>>;
+
+// supabase をオプションで受け取るようにして、呼び出し側で使い回せるようにします。
+// 引数がない場合は内部で生成（互換性のため）。
+async function getCurrentUserId(supabase?: SupabaseClientType): Promise<string> {
+    const client = supabase ?? (await createClient());
+    const { data: { user }, error } = await client.auth.getUser();
     if (error || !user) throw new Error("ログインユーザーが取得できません");
     return user.id;
 }
@@ -16,7 +20,7 @@ async function getCurrentUserId() {
 // 旅行プラン一覧取得
 export async function getTravelPlanAPI(): Promise<TravelPlan[]> {
     const supabase = await createClient();
-    const userId = await getCurrentUserId();
+    const userId = await getCurrentUserId(supabase);
 
     const { data, error } = await supabase
         .from("travel_plans")
@@ -34,11 +38,10 @@ export async function getTravelPlanAPI(): Promise<TravelPlan[]> {
     return travelPlans;
 }
 
-
 // 新規旅行プラン作成
 export async function addTravelPlanAPI(plan: Omit<TravelPlan, 'id' | 'createdAt' | 'updatedAt' | 'activities'>): Promise<Omit<TravelPlan, 'activities'>> {
     const supabase = await createClient(); // ←ここも変更
-    const userId = await getCurrentUserId();
+    const userId = await getCurrentUserId(supabase);
 
     const { data, error } = await supabase
         .from("travel_plans")

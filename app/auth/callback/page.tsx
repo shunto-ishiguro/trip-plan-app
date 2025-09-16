@@ -11,7 +11,7 @@ export default function AuthCallbackPage() {
     useEffect(() => {
         async function handleCallback() {
             try {
-                // ブラウザの localStorage に保存されているセッションを取得
+
                 const { data: { session } } = await supabase.auth.getSession();
 
                 if (session) {

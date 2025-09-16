@@ -92,9 +92,9 @@ export function TravelPlanForm({ plan, onSubmit, onCancel }: TravelPlanFormProps
                                 type="text"
                                 onChange={(e) => {
                                     const val = e.target.value;
-                                    if(/^d*$/.test(val)){
+                                    if (/^d*$/.test(val)) {
                                         setFormData({ ...formData, budget: Number(e.target.value) });
-                                    } 
+                                    }
                                 }}
                                 placeholder="100000"
                                 min="0"
