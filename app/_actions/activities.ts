@@ -29,7 +29,7 @@ export async function addActivityAPI(planId: string, activity: Omit<Activity, "i
     const supabase = await createClient();
     const { data, error } = await supabase
         .from("activities")
-        .insert([{ ...activity, plan_id: planId }])
+        .insert([{ ...toDBActivity(activity), plan_id: planId }])
         .select("*")
         .single();
 
