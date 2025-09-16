@@ -1,5 +1,4 @@
-//app/middleware.ts
-
+// Supabase公式ドキュメント推奨のシンプルなコード
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
@@ -19,17 +18,7 @@ export async function middleware(request: NextRequest) {
                     return request.cookies.get(name)?.value
                 },
                 set(name: string, value: string, options: CookieOptions) {
-                    // 🔽 ここ変更（`request.cookies.set` を追加してから response を再生成 → response.cookies.set）
-                    request.cookies.set({
-                        name,
-                        value,
-                        ...options,
-                    })
-                    response = NextResponse.next({
-                        request: {
-                            headers: request.headers,
-                        },
-                    })
+                    // リクエストのCookieをいじるのではなく、レスポンスに設定するだけ
                     response.cookies.set({
                         name,
                         value,
@@ -37,17 +26,7 @@ export async function middleware(request: NextRequest) {
                     })
                 },
                 remove(name: string, options: CookieOptions) {
-                    // 🔽 ここ変更（`request.cookies.set` を追加してから response を再生成 → response.cookies.set）
-                    request.cookies.set({
-                        name,
-                        value: '',
-                        ...options,
-                    })
-                    response = NextResponse.next({
-                        request: {
-                            headers: request.headers,
-                        },
-                    })
+                    // リクエストのCookieをいじるのではなく、レスポンスに設定するだけ
                     response.cookies.set({
                         name,
                         value: '',
@@ -58,20 +37,19 @@ export async function middleware(request: NextRequest) {
         }
     )
 
-    const { data: { session }, error } = await supabase.auth.getSession()
+    // セッションを取得（この時点ではリフレッシュトークンが使われる可能性がある）
+    const { data: { session } } = await supabase.auth.getSession()
 
-    console.log("session in middleware:", session)
-    console.log("error in middleware:", error)
+    // 🔽 ここから下のロジックはあなたのアプリに合わせて修正してください
 
-    // ログインしていない、かつログインページ以外にアクセスした場合
-    if (!session && request.nextUrl.pathname !== '/') {
+    // 未ログインで保護されたページにアクセスした場合、ログインページにリダイレクト
+    if (!session && request.nextUrl.pathname.startsWith('/appContent')) {
         return NextResponse.redirect(new URL('/', request.url))
     }
 
-    // ログイン済み、かつログインページにアクセスした場合
+    // ログイン済みでログインページにアクセスした場合、ダッシュボードにリダイレクト
     if (session && request.nextUrl.pathname === '/') {
-        // 🔽 ここたぶん変更点（本来はログイン後ページへリダイレクトするはずだけど、今は "/" に固定されてる）
-        return NextResponse.redirect(new URL('/', request.url))
+        return NextResponse.redirect(new URL('/appContent', request.url))
     }
 
     return response
@@ -79,12 +57,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
     matcher: [
-        /*
-         * Match all request paths except for the ones starting with:
-         * - _next/static (static files)
-         * - _next/image (image optimization files)
-         * - favicon.ico (favicon file)
-         */
-        '/((?!_next/static|_next/image|favicon.ico).*)',
+        /* ... */
     ],
 }
