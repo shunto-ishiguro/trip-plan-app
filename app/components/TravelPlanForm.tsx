@@ -148,8 +148,9 @@ export function TravelPlanForm({ plan, onSubmit, onCancel }: TravelPlanFormProps
                                 onChange={(e) => {
                                     const val = e.target.value;
                                     if(/^d*$/.test(val)){
+                                        console.log(Number(e.target.value));
                                         setFormData({ ...formData, budget: Number(e.target.value) });
-                                    } 
+                                    }
                                 }}
                                 placeholder="100000"
                                 min="0"
