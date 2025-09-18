@@ -3,7 +3,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { TravelPlan, Activity, ViewMode } from '../types/travel';
-import { getTravelPlanAPI, addTravelPlanAPI, deleteTravelPlanAPI, updateTravelPlanAPI } from '../_actions/travelPlans';
+import { getTravelPlanAPI, addTravelPlanAPI, deleteTravelPlanAPI, updateTravelPlanAPI } from '../../lib/api/travelPlans';
 
 export function useTravelPlan() {
   const [viewMode, setViewMode] = useState<ViewMode>('list');

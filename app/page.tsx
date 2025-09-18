@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { supabaseClient } from "@/lib/supabase/client";
 
 export default function Page() {
   const [loading, setLoading] = useState(false);
-  const supabase = createClient();
+  const supabase = supabaseClient;
 
   const handleLogin = async (provider: "google" | "github") => {
     setLoading(true);
@@ -13,7 +13,7 @@ export default function Page() {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`, // コールバック先
+        redirectTo: `${window.location.origin}/appContent`, // コールバック先
       },
     });
 

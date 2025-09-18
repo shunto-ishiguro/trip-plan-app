@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from "react";
 import { Activity, TravelPlan } from "../types/travel";
-import { getActivityAPI, addActivityAPI, updateActivityAPI, deleteActivityAPI } from "../_actions/activities";
+import { getActivityAPI, addActivityAPI, updateActivityAPI, deleteActivityAPI } from "../../lib/api/activities";
 
 export function useActivity(plan: TravelPlan, onUpdateActivities: (activities: Activity[]) => void) {
     const [activities, setActivities] = useState<Activity[]>(plan.activities || []);
