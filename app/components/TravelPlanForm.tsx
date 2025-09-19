@@ -21,14 +21,17 @@ export function TravelPlanForm({ plan, onSubmit, onCancel }: TravelPlanFormProps
         endDate: plan?.endDate || new Date(),
         description: plan?.description || '',
         imageUrl: plan?.imageUrl || '',
-        budget: plan?.budget || 0,
+        budget: plan?.budget?.toString() || '',
         currency: plan?.currency || 'JPY',
         activities: plan?.activities || []
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSubmit(formData);
+        onSubmit({
+            ...formData,
+            budget: Number(formData.budget) || 0,  // ここで文字列 → 数値に変換
+        });
     };
 
     return (
@@ -89,13 +92,9 @@ export function TravelPlanForm({ plan, onSubmit, onCancel }: TravelPlanFormProps
                             <Label htmlFor="budget">予算</Label>
                             <Input
                                 id="budget"
-                                type="text"
-                                onChange={(e) => {
-                                    const val = e.target.value;
-                                    if (/^d*$/.test(val)) {
-                                        setFormData({ ...formData, budget: Number(e.target.value) });
-                                    }
-                                }}
+                                type="number"
+                                value={formData.budget}
+                                onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
                                 placeholder="100000"
                                 min="0"
                             />
