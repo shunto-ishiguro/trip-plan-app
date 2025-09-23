@@ -1,41 +1,37 @@
 //app/hooks/useTravelPlan.ts
 
 "use client";
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { TravelPlan, Activity, ViewMode } from '../types/travel';
-import { getTravelPlanAPI, addTravelPlanAPI, deleteTravelPlanAPI, updateTravelPlanAPI } from '../../lib/api/travelPlans';
+import { addTravelPlan } from '../actions/travel/addTravelPlan';
+import { updateTravelPlan } from '../actions/travel/updateTravelPlan';
+import { deleteTravelPlan } from '../actions/travel/deleteTravelPlan';
 
-export function useTravelPlan() {
+export function useTravelPlan(initialPlans: TravelPlan[]) {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [editingPlan, setEditingPlan] = useState<TravelPlan | null>(null);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
-  const [plans, setPlans] = useState<TravelPlan[]>([]);
+  const [plans, setPlans] = useState<TravelPlan[]>(initialPlans);
 
-  useEffect(() => {
-
-    getTravelPlanAPI().then(setPlans).catch(console.error);
-  }, []);
-
-
-  const handleCreatePlan = async (planData: Omit<TravelPlan, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const handleCreatePlan = async (planData: Omit<TravelPlan, 'id'>) => {
     const { activities, ...travelPlanWithoutActivities } = planData;
-    const newPlan = await addTravelPlanAPI(travelPlanWithoutActivities);
-    setPlans([...plans, { ...newPlan, activities }]);
+    const newPlanId = await addTravelPlan(travelPlanWithoutActivities);
+    setPlans([...plans, { ...planData, id: newPlanId }]);
     setViewMode('list');
   };
 
-  const handleUpdatePlan = async (planData: Omit<TravelPlan, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const handleUpdatePlan = async (planData: Omit<TravelPlan, 'id'>) => {
     if (!editingPlan) return;
     const { activities, ...planWithoutActivities } = planData;
-    const updated = await updateTravelPlanAPI(editingPlan.id, planWithoutActivities);
-    if (updated) setPlans(plans.map(p => p.id === editingPlan.id ? { ...updated, activities } : p));
+    await updateTravelPlan(editingPlan.id, planWithoutActivities);
+    setPlans(plans.map(p => p.id === editingPlan.id ? { ...planData, id: editingPlan.id } : p));
     setEditingPlan(null);
     setViewMode('list');
   };
 
   const handleDeletePlan = async (planId: string) => {
     if (confirm('この旅行プランを削除しますか？')) {
-      await deleteTravelPlanAPI(planId);
+      await deleteTravelPlan(planId);
       setPlans(plans.filter(p => p.id !== planId));
     }
   };

@@ -1,7 +1,7 @@
 import { DBTravelPlan, TravelPlan } from '../../app/types/travel';
 
 //TravelPlan型からデータベースのテーブルに寄せたDBPlan型に変更する
-export function toDBTravelPlan(plan: Omit<TravelPlan, 'id' | 'createdAt' | 'updatedAt' | 'activities'>): DBTravelPlan {
+export function toDBTravelPlan(plan: Omit<TravelPlan, 'id' | 'activities'>): DBTravelPlan {
     return {
         title: plan.title,
         destination: plan.destination,
@@ -26,8 +26,6 @@ export function toTravelPlan(plan: DBTravelPlan): Omit<TravelPlan, 'activities'>
             imageUrl: plan.image_url,
             budget: plan.budget,
             currency: plan.currency,
-            createdAt: new Date(plan.created_at),
-            updatedAt: new Date(plan.updated_at)
         };
     }
     else {

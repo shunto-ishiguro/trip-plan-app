@@ -9,8 +9,6 @@ export interface TravelPlan {
     budget: number;
     currency: string;
     activities: Activity[];
-    createdAt: Date;
-    updatedAt: Date;
 }
 
 export interface Activity {

@@ -1,11 +1,11 @@
 //lib/api/activities.ts
 
-import { supabaseClient } from "../../lib/supabase/client";
+import { createClientSupabaseClient } from "../../lib/supabase/client";
 import { Activity, DBActivity } from "../../app/types/travel";
 import { toDBActivity, toActivity } from '../../lib/mappers/activityMapper';
 
 export async function getActivityAPI(planId: string): Promise<Activity[]> {
-    const supabase = supabaseClient;
+    const supabase = createClientSupabaseClient;
     const { data, error } = await supabase
         .from("activities")
         .select("*")
@@ -24,7 +24,7 @@ export async function getActivityAPI(planId: string): Promise<Activity[]> {
 }
 
 export async function addActivityAPI(planId: string, activity: Omit<Activity, "id">): Promise<Activity> {
-    const supabase = supabaseClient;
+    const supabase = createClientSupabaseClient;
     const { data, error } = await supabase
         .from("activities")
         .insert([{ ...toDBActivity(activity), plan_id: planId }])
@@ -40,7 +40,7 @@ export async function addActivityAPI(planId: string, activity: Omit<Activity, "i
 }
 
 export async function updateActivityAPI(activityId: string, updates: Omit<Activity, 'id'>): Promise<Activity> {
-    const supabase = supabaseClient;
+    const supabase = createClientSupabaseClient;
     const { data, error } = await supabase
         .from("activities")
         .update({ ...toDBActivity(updates), updated_at: new Date().toISOString() })
@@ -57,7 +57,7 @@ export async function updateActivityAPI(activityId: string, updates: Omit<Activi
 }
 
 export async function deleteActivityAPI(activityId: string) {
-    const supabase = supabaseClient;
+    const supabase = createClientSupabaseClient;
     const { error } = await supabase
         .from("activities")
         .delete()

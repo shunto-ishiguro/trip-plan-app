@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 
 interface TravelPlanFormProps {
     plan?: TravelPlan;
-    onSubmit: (plan: Omit<TravelPlan, 'id' | 'createdAt' | 'updatedAt'>) => void;
+    onSubmit: (plan: Omit<TravelPlan, 'id'>) => void;
     onCancel: () => void;
 }
 

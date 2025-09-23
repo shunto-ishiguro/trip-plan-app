@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { supabaseClient } from "@/lib/supabase/client";
+import { createClientSupabaseClient } from "@/lib/supabase/client";
 
 export default function Page() {
   const [loading, setLoading] = useState(false);
-  const supabase = supabaseClient;
+  const supabase = createClientSupabaseClient;
 
   const handleLogin = async (provider: "google" | "github") => {
     setLoading(true);
