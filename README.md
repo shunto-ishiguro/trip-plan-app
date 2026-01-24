@@ -1,50 +1,60 @@
-# 旅行計画アプリケーション プロジェクト概要
+# Trip Plan App
 
-このプロジェクトは、**Supabase**と**Next.js**を使用して構築されたモダンな旅行計画アプリケーションです。  
-ユーザー認証からデータの保存・管理まで、Supabaseが提供する**BaaS (Backend as a Service)** の機能をフル活用しているのが大きな特徴です。
+旅行計画アプリのモノレポ
 
-ユーザーはGoogleアカウントで簡単にログインし、自分だけの旅行プランを作成、編集、閲覧できます。  
-各プランには、時系列で**「アクティビティ」（観光、食事、移動など）**を追加でき、旅のしおりとして詳細な計画を立てることが可能です。
+## 構成
 
----
+```
+apps/
+  web/       # Next.js (React)
+  mobile/    # Expo (React Native)
+  api/       # Go API
+packages/
+  shared/              # 共有コード
+  typescript-config/   # TypeScript設定
+```
 
-## 主な機能
+## 必要な環境
 
-### 1. ユーザー認証
-- Supabase OAuthを利用した、安全で簡単なGoogleログイン機能。
+- Node.js 22+
+- pnpm 10+
+- Go 1.21+
+- golangci-lint (Go linter)
 
-### 2. 旅行プランのCRUD
-- 旅行のタイトル、目的地、日程、予算などを登録・管理できます。
-- 作成したプランはカード形式で一覧表示されます。
-- 既存プランの編集や削除も直感的に行えます。
+## セットアップ
 
-### 3. アクティビティ管理
-- 旅行プランに紐づく詳細なアクティビティを時系列で管理できます。
-- 各アクティビティの完了チェックや費用管理も可能です。
+```bash
+# 依存関係インストール
+pnpm install
 
-### 4. データセキュリティ
-- Supabaseの**RLS (Row Level Security)** を利用し、ログインユーザーは自分が作成したデータにしかアクセスできないように制御。
+# Git hooks設定 (自動実行)
+# pnpm prepare
+```
 
-### 5. 動的なUI
-- 状態管理によって、プラン一覧・作成フォーム・詳細表示をページ遷移なしでシームレスに切り替え。
+## 開発
 
----
+```bash
+# 全て起動
+pnpm dev
 
-## 技術スタック
+# 個別起動
+pnpm dev:web      # Web (Next.js)
+pnpm dev:mobile   # Mobile (Expo)
+pnpm dev:api      # API (Go)
+```
 
-- **フロントエンド:** Next.js (App Router), React, TypeScript  
-- **バックエンド & DB:** Supabase (Auth, PostgreSQL, RLS)  
-- **UI:** Tailwind CSS, shadcn/ui, Lucide React  
-- **状態管理:** React Hooks (useState, useEffect) を活用したカスタムフック  
-- **デプロイ:** Vercel  
+## コマンド
 
----
+```bash
+pnpm lint         # Lint (Biome)
+pnpm lint:fix     # Lint + 自動修正
+pnpm format       # フォーマット
+pnpm build        # 全ビルド
+pnpm build:web    # Webのみビルド
+```
 
-## アーキテクチャの特徴
+## CI/CD
 
-- フロントエンドから直接SupabaseのAPIを叩く構成になっています。  
-  認証やデータベース操作などのバックエンドロジックはSupabaseに任せることで、フロントエンドの開発に集中できる設計です。
-
-- **カスタムフック (`useTravelPlan`, `useActivity`)** に状態やロジックをカプセル化することで、  
-  コンポーネントの関心を分離し、見通しの良いコードを実現しています。
-
+GitHub Actionsで以下を実行:
+- Lint (JS/TS: Biome, Go: golangci-lint)
+- Build (Web, API)
