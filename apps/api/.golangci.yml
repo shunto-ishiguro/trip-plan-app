@@ -11,8 +11,7 @@ formatters:
   enable:
     - gofmt
     - goimports
-
-linters-settings:
-  goimports:
-    local-prefixes:
-      - github.com/shunto-ishiguro/trip-plan-app
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/shunto-ishiguro/trip-plan-app
