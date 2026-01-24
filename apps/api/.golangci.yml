@@ -1,17 +1,18 @@
+version: "2"
+
 linters:
   enable:
     - errcheck
-    - gosimple
     - govet
-    - ineffassign
     - staticcheck
     - unused
+
+formatters:
+  enable:
     - gofmt
     - goimports
 
 linters-settings:
   goimports:
-    local-prefixes: github.com/your-username/trip-plan-app
-
-issues:
-  exclude-use-default: false
+    local-prefixes:
+      - github.com/your-username/trip-plan-app
