@@ -18,7 +18,7 @@ packages/
 
 - Node.js 22+
 - pnpm 10+
-- Go 1.21+
+- Go 1.24+
 - golangci-lint (Go linter)
 
 ## セットアップ

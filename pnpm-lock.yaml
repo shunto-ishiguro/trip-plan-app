@@ -20,6 +20,9 @@ importers:
 
   apps/mobile:
     dependencies:
+      '@trip-plan/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       expo:
         specifier: ~54.0.32
         version: 54.0.32(@babel/core@7.28.6)(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -42,6 +45,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@trip-plan/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       next:
         specifier: 16.1.4
         version: 16.1.4(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -62,11 +68,11 @@ importers:
         specifier: ^20
         version: 20.19.30
       '@types/react':
-        specifier: ^19
-        version: 19.1.17
+        specifier: ^19.2.0
+        version: 19.2.9
       '@types/react-dom':
         specifier: ^19
-        version: 19.2.3(@types/react@19.1.17)
+        version: 19.2.3(@types/react@19.2.9)
       tailwindcss:
         specifier: ^4
         version: 4.1.18
@@ -1208,6 +1214,9 @@ packages:
 
   '@types/react@19.1.17':
     resolution: {integrity: sha512-Qec1E3mhALmaspIrhWt9jkQMNdw6bReVu64mjvhbhq2NFPftLPVr+l1SZgmw/66WwBNpDh7ao5AT6gF5v41PFA==}
+
+  '@types/react@19.2.9':
+    resolution: {integrity: sha512-Lpo8kgb/igvMIPeNV2rsYKTgaORYdO1XGVZ4Qz3akwOj0ySGYMPlQWa8BaLn0G63D1aSaAQ5ldR06wCpChQCjA==}
 
   '@types/stack-utils@2.0.3':
     resolution: {integrity: sha512-9aEbYZ3TbYMznPdcdr3SmIrLXwC/AKZXQeCf9Pgao5CKb8CyHuEX5jzWPTkvregvhRJHcpRO6BFoGW9ycaOkYw==}
@@ -4541,11 +4550,15 @@ snapshots:
     dependencies:
       undici-types: 6.21.0
 
-  '@types/react-dom@19.2.3(@types/react@19.1.17)':
+  '@types/react-dom@19.2.3(@types/react@19.2.9)':
     dependencies:
-      '@types/react': 19.1.17
+      '@types/react': 19.2.9
 
   '@types/react@19.1.17':
+    dependencies:
+      csstype: 3.2.3
+
+  '@types/react@19.2.9':
     dependencies:
       csstype: 3.2.3
 
