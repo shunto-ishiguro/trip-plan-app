@@ -1,4 +1,4 @@
-module github.com/shunto/trip-plan-app/apps/api
+module github.com/shunto-ishiguro/trip-plan-app/apps/api
 
 go 1.24.0
 

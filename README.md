@@ -27,7 +27,17 @@ packages/
 # 依存関係インストール
 pnpm install
 
-# Git hooks設定 (自動実行)
+# 環境変数の設定
+cp .env.example .env
+# .env を編集して必要な値を設定
+
+# Go依存関係インストール
+cd apps/api && go mod download && cd ../..
+
+# 共有パッケージのビルド
+pnpm build:shared
+
+# Git hooks設定 (pnpm install時に自動実行)
 # pnpm prepare
 ```
 
@@ -51,6 +61,7 @@ pnpm lint:fix     # Lint + 自動修正
 pnpm format       # フォーマット
 pnpm build        # 全ビルド
 pnpm build:web    # Webのみビルド
+pnpm build:shared # 共有パッケージビルド
 ```
 
 ## CI/CD
