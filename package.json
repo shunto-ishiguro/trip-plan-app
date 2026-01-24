@@ -2,6 +2,12 @@
   "name": "trip-plan-app",
   "version": "1.0.0",
   "private": true,
+  "pnpm": {
+    "ignoredBuiltDependencies": [
+      "sharp",
+      "unrs-resolver"
+    ]
+  },
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",

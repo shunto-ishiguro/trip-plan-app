@@ -9,6 +9,6 @@
   },
   "devDependencies": {
     "@trip-plan/typescript-config": "workspace:*",
-    "typescript": "^5.0.0"
+    "typescript": "^5"
   }
 }

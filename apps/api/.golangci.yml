@@ -14,4 +14,4 @@ formatters:
   settings:
     goimports:
       local-prefixes:
-        - github.com/shunto/trip-plan-app
+        - github.com/shunto-ishiguro/trip-plan-app
