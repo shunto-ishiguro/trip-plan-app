@@ -1,0 +1,14 @@
+{
+  "name": "@trip-plan/shared",
+  "version": "0.0.1",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "@trip-plan/typescript-config": "workspace:*",
+    "typescript": "^5.0.0"
+  }
+}
