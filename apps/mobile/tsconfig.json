@@ -1,5 +1,5 @@
 {
-  "extends": "expo/tsconfig.base",
+  "extends": "@trip-plan/typescript-config/react-native.json",
   "compilerOptions": {
     "strict": true
   }
