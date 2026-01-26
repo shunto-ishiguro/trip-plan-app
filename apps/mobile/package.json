@@ -12,7 +12,7 @@
     "@trip-plan/shared": "workspace:*",
     "expo": "~54.0.32",
     "expo-status-bar": "~3.0.9",
-    "react": "19.2.3",
+    "react": "19.2.4",
     "react-native": "0.83.1"
   },
   "devDependencies": {
