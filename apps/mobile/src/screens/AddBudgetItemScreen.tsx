@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -46,7 +46,7 @@ export function AddBudgetItemScreen() {
       Alert.alert('エラー', '項目名を入力してください');
       return;
     }
-    if (!amount.trim() || isNaN(Number(amount))) {
+    if (!amount.trim() || Number.isNaN(Number(amount))) {
       Alert.alert('エラー', '金額を正しく入力してください');
       return;
     }

@@ -1,5 +1,5 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -20,7 +20,7 @@ export function TripCreateScreen() {
   const navigation = useNavigation();
   const route = useRoute<Props['route']>();
   const isEdit = route.name === 'TripEdit';
-  const tripId = isEdit ? (route.params as { tripId: string }).tripId : null;
+  const _tripId = isEdit ? (route.params as { tripId: string }).tripId : null;
 
   const [title, setTitle] = useState('');
   const [startDate, setStartDate] = useState('');

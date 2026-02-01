@@ -1,6 +1,6 @@
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Alert, Modal, Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface ShareSheetProps {

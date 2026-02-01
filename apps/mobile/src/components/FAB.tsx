@@ -1,5 +1,4 @@
 import * as Haptics from 'expo-haptics';
-import React from 'react';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 interface FABProps {
