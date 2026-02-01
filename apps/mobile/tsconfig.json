@@ -1,6 +1,8 @@
 {
-  "extends": "@trip-plan/typescript-config/react-native.json",
+  "extends": "expo/tsconfig.base.json",
   "compilerOptions": {
     "strict": true
-  }
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
 }
