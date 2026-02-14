@@ -1,8 +1,10 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
 import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 import { BudgetItemCard, FAB } from '../components';
 import type { TripTabScreenProps } from '../navigation/types';
+import { colors, gradients, radius, shadows, spacing, typography } from '../theme';
 import type { BudgetItem } from '../types';
 
 // モックデータ
@@ -13,6 +15,7 @@ const MOCK_BUDGET_ITEMS: BudgetItem[] = [
     category: 'transport',
     name: '新幹線（往復）',
     amount: 27000,
+    pricingType: 'per_person',
   },
   {
     id: '2',
@@ -20,6 +23,7 @@ const MOCK_BUDGET_ITEMS: BudgetItem[] = [
     category: 'accommodation',
     name: 'ホテル 2泊',
     amount: 24000,
+    pricingType: 'total',
     memo: '朝食付き',
   },
   {
@@ -28,6 +32,7 @@ const MOCK_BUDGET_ITEMS: BudgetItem[] = [
     category: 'food',
     name: '昼食・夕食',
     amount: 15000,
+    pricingType: 'total',
   },
   {
     id: '4',
@@ -35,6 +40,7 @@ const MOCK_BUDGET_ITEMS: BudgetItem[] = [
     category: 'activity',
     name: '寺社拝観料',
     amount: 3000,
+    pricingType: 'per_person',
   },
   {
     id: '5',
@@ -42,16 +48,9 @@ const MOCK_BUDGET_ITEMS: BudgetItem[] = [
     category: 'other',
     name: 'お土産',
     amount: 5000,
+    pricingType: 'per_person',
   },
 ];
-
-const CATEGORY_COLORS: Record<BudgetItem['category'], string> = {
-  transport: '#3B82F6',
-  accommodation: '#8B5CF6',
-  food: '#F59E0B',
-  activity: '#10B981',
-  other: '#6B7280',
-};
 
 type Props = TripTabScreenProps<'Budget'>;
 
@@ -63,13 +62,17 @@ export function BudgetScreen() {
   const [items] = useState<BudgetItem[]>(MOCK_BUDGET_ITEMS);
   const memberCount = 2; // TODO: 旅行情報から取得
 
-  const totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
+  // pricingType に応じて全体金額を計算
+  const getItemTotal = (item: BudgetItem) =>
+    item.pricingType === 'per_person' ? item.amount * memberCount : item.amount;
+
+  const totalAmount = items.reduce((sum, item) => sum + getItemTotal(item), 0);
   const perPersonAmount = Math.ceil(totalAmount / memberCount);
 
   // カテゴリ別の集計
   const categoryTotals = items.reduce(
     (acc, item) => {
-      acc[item.category] = (acc[item.category] || 0) + item.amount;
+      acc[item.category] = (acc[item.category] || 0) + getItemTotal(item);
       return acc;
     },
     {} as Record<string, number>,
@@ -90,7 +93,12 @@ export function BudgetScreen() {
   const renderHeader = () => (
     <View>
       {/* サマリーカード */}
-      <View style={styles.summaryCard}>
+      <LinearGradient
+        colors={[...gradients.primary]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.summaryCard}
+      >
         <View style={styles.summaryRow}>
           <View style={styles.summaryItem}>
             <Text style={styles.summaryLabel}>合計</Text>
@@ -102,7 +110,7 @@ export function BudgetScreen() {
             <Text style={styles.summaryAmountSmall}>¥{perPersonAmount.toLocaleString()}</Text>
           </View>
         </View>
-      </View>
+      </LinearGradient>
 
       {/* カテゴリ別内訳 */}
       <View style={styles.breakdownCard}>
@@ -117,7 +125,7 @@ export function BudgetScreen() {
                   styles.breakdownBar,
                   {
                     width: `${percentage}%`,
-                    backgroundColor: CATEGORY_COLORS[category as BudgetItem['category']],
+                    backgroundColor: colors.category[category as BudgetItem['category']],
                   },
                 ]}
               />
@@ -130,7 +138,7 @@ export function BudgetScreen() {
               <View
                 style={[
                   styles.legendDot,
-                  { backgroundColor: CATEGORY_COLORS[category as BudgetItem['category']] },
+                  { backgroundColor: colors.category[category as BudgetItem['category']] },
                 ]}
               />
               <Text style={styles.legendAmount}>¥{amount.toLocaleString()}</Text>
@@ -149,7 +157,11 @@ export function BudgetScreen() {
         data={items}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <BudgetItemCard item={item} onPress={() => handleItemPress(item)} />
+          <BudgetItemCard
+            item={item}
+            memberCount={memberCount}
+            onPress={() => handleItemPress(item)}
+          />
         )}
         ListHeaderComponent={renderHeader}
         contentContainerStyle={styles.listContent}
@@ -171,16 +183,16 @@ export function BudgetScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.background.primary,
   },
   listContent: {
     paddingBottom: 100,
   },
   summaryCard: {
-    backgroundColor: '#3B82F6',
-    margin: 16,
-    borderRadius: 16,
-    padding: 20,
+    margin: spacing.lg,
+    borderRadius: radius['2xl'],
+    padding: spacing.xl,
+    ...shadows.lg,
   },
   summaryRow: {
     flexDirection: 'row',
@@ -196,39 +208,40 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
   },
   summaryLabel: {
-    fontSize: 13,
+    fontSize: typography.fontSizes.md,
     color: 'rgba(255, 255, 255, 0.8)',
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   summaryAmount: {
-    fontSize: 28,
-    fontWeight: '700',
+    fontSize: typography.fontSizes['5xl'],
+    fontWeight: typography.fontWeights.bold,
     color: '#fff',
   },
   summaryAmountSmall: {
     fontSize: 22,
-    fontWeight: '600',
+    fontWeight: typography.fontWeights.semibold,
     color: '#fff',
   },
   breakdownCard: {
-    backgroundColor: '#fff',
-    marginHorizontal: 16,
-    marginBottom: 16,
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: colors.background.card,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
+    borderRadius: radius.xl,
+    padding: spacing.lg,
+    ...shadows.sm,
   },
   breakdownTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 12,
+    fontSize: typography.fontSizes.base,
+    fontWeight: typography.fontWeights.semibold,
+    color: colors.text.secondary,
+    marginBottom: spacing.base,
   },
   breakdownChart: {
     flexDirection: 'row',
     height: 12,
-    borderRadius: 6,
+    borderRadius: radius.sm,
     overflow: 'hidden',
-    marginBottom: 12,
+    marginBottom: spacing.base,
   },
   breakdownBar: {
     height: '100%',
@@ -236,7 +249,7 @@ const styles = StyleSheet.create({
   breakdownLegend: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: spacing.base,
   },
   legendItem: {
     flexDirection: 'row',
@@ -246,19 +259,19 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    marginRight: 6,
+    marginRight: spacing.sm,
   },
   legendAmount: {
-    fontSize: 12,
-    color: '#6B7280',
+    fontSize: typography.fontSizes.sm,
+    color: colors.text.tertiary,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1F2937',
-    marginHorizontal: 16,
-    marginTop: 8,
-    marginBottom: 8,
+    fontSize: typography.fontSizes.xl,
+    fontWeight: typography.fontWeights.semibold,
+    color: colors.text.primary,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
+    marginBottom: spacing.md,
   },
   emptyContainer: {
     alignItems: 'center',
@@ -266,11 +279,11 @@ const styles = StyleSheet.create({
   },
   emptyIcon: {
     fontSize: 48,
-    marginBottom: 12,
+    marginBottom: spacing.base,
   },
   emptyText: {
-    fontSize: 15,
-    color: '#6B7280',
+    fontSize: typography.fontSizes.lg,
+    color: colors.text.tertiary,
     textAlign: 'center',
     lineHeight: 22,
   },

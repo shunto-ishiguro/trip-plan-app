@@ -10,15 +10,15 @@ updates:
       dependencies:
         patterns:
           - "*"
+    ignore:
+      # Expo SDKアップグレード時に npx expo install --fix でまとめて更新する
+      - dependency-name: "react"
+      - dependency-name: "react-native"
+      - dependency-name: "react-native-screens"
+      - dependency-name: "react-native-safe-area-context"
+      - dependency-name: "@types/react"
+      - dependency-name: "expo"
     open-pull-requests-limit: 10
-
-  # Go
-  - package-ecosystem: "gomod"
-    directory: "/apps/api"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-    open-pull-requests-limit: 5
 
   # GitHub Actions
   - package-ecosystem: "github-actions"

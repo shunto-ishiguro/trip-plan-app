@@ -33,6 +33,7 @@ export interface BudgetItem {
   category: 'transport' | 'accommodation' | 'food' | 'activity' | 'other';
   name: string;
   amount: number;
+  pricingType: 'total' | 'per_person';
   memo?: string;
 }
 

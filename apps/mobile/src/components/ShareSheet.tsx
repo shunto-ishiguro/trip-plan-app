@@ -2,6 +2,8 @@ import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
 import { Alert, Modal, Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { colors, radius, spacing, typography } from '../theme';
+import { GradientButton } from './GradientButton';
 
 interface ShareSheetProps {
   visible: boolean;
@@ -103,9 +105,9 @@ export function ShareSheet({ visible, onClose, tripId, tripTitle }: ShareSheetPr
           </View>
 
           {/* 共有ボタン */}
-          <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-            <Text style={styles.shareButtonText}>共有する</Text>
-          </TouchableOpacity>
+          <View style={styles.shareButtonContainer}>
+            <GradientButton onPress={handleShare} label="共有する" />
+          </View>
 
           {/* 閉じるボタン */}
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -124,126 +126,117 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   sheet: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.background.card,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.xl,
     paddingBottom: 40,
   },
   handle: {
     width: 40,
     height: 4,
-    backgroundColor: '#D1D5DB',
+    backgroundColor: colors.border.primary,
     borderRadius: 2,
     alignSelf: 'center',
-    marginTop: 12,
-    marginBottom: 20,
+    marginTop: spacing.base,
+    marginBottom: spacing.xl,
   },
   title: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#1F2937',
+    fontSize: typography.fontSizes['3xl'],
+    fontWeight: typography.fontWeights.semibold,
+    color: colors.text.primary,
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: spacing['2xl'],
   },
   section: {
-    marginBottom: 20,
+    marginBottom: spacing.xl,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#6B7280',
+    fontSize: typography.fontSizes.base,
+    fontWeight: typography.fontWeights.medium,
+    color: colors.text.tertiary,
     marginBottom: 10,
   },
   permissionRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: spacing.base,
   },
   permissionOption: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 10,
+    paddingVertical: spacing.base,
+    borderRadius: radius.lg,
     borderWidth: 2,
-    borderColor: '#E5E7EB',
+    borderColor: colors.border.primary,
     alignItems: 'center',
   },
   permissionOptionActive: {
-    borderColor: '#3B82F6',
-    backgroundColor: '#EFF6FF',
+    borderColor: colors.accent,
+    backgroundColor: colors.accentLight,
   },
   permissionText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#6B7280',
+    fontSize: typography.fontSizes.lg,
+    fontWeight: typography.fontWeights.medium,
+    color: colors.text.tertiary,
   },
   permissionTextActive: {
-    color: '#3B82F6',
+    color: colors.accent,
   },
   qrContainer: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: spacing.xl,
   },
   qrPlaceholder: {
     width: 160,
     height: 160,
-    backgroundColor: '#F3F4F6',
-    borderRadius: 12,
+    backgroundColor: colors.background.elevated,
+    borderRadius: radius.xl,
     justifyContent: 'center',
     alignItems: 'center',
   },
   qrPlaceholderText: {
-    fontSize: 16,
-    color: '#6B7280',
+    fontSize: typography.fontSizes.xl,
+    color: colors.text.tertiary,
   },
   qrPlaceholderSubtext: {
-    fontSize: 11,
-    color: '#9CA3AF',
-    marginTop: 4,
+    fontSize: typography.fontSizes.xs,
+    color: colors.text.quaternary,
+    marginTop: spacing.xs,
   },
   urlContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 16,
+    backgroundColor: colors.background.elevated,
+    borderRadius: radius.lg,
+    padding: spacing.base,
+    marginBottom: spacing.lg,
   },
   url: {
     flex: 1,
-    fontSize: 13,
-    color: '#374151',
+    fontSize: typography.fontSizes.md,
+    color: colors.text.secondary,
     fontFamily: 'monospace',
   },
   copyButton: {
-    backgroundColor: '#E5E7EB',
+    backgroundColor: colors.border.primary,
     paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 8,
-    marginLeft: 8,
+    paddingVertical: spacing.md,
+    borderRadius: radius.md,
+    marginLeft: spacing.md,
   },
   copyButtonText: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#374151',
+    fontSize: typography.fontSizes.md,
+    fontWeight: typography.fontWeights.medium,
+    color: colors.text.secondary,
   },
-  shareButton: {
-    backgroundColor: '#3B82F6',
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  shareButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+  shareButtonContainer: {
+    marginBottom: spacing.base,
   },
   closeButton: {
-    paddingVertical: 12,
+    paddingVertical: spacing.base,
     alignItems: 'center',
   },
   closeButtonText: {
-    fontSize: 15,
-    color: '#6B7280',
+    fontSize: typography.fontSizes.lg,
+    color: colors.text.tertiary,
   },
 });

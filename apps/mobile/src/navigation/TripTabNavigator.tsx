@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ShareSheet } from '../components';
 import { BudgetScreen, ChecklistScreen, ReservationsScreen, ScheduleScreen } from '../screens';
+import { colors, typography } from '../theme';
 import type { RootStackParamList, TripTabParamList } from './types';
 
 const Tab = createBottomTabNavigator<TripTabParamList>();
@@ -53,8 +54,8 @@ export function TripTabNavigator() {
             <Ionicons name={TAB_ICONS[route.name]} size={size} color={color} />
           ),
           tabBarLabel: TAB_LABELS[route.name],
-          tabBarActiveTintColor: '#3B82F6',
-          tabBarInactiveTintColor: '#6B7280',
+          tabBarActiveTintColor: colors.accent,
+          tabBarInactiveTintColor: colors.text.tertiary,
           tabBarStyle: styles.tabBar,
           tabBarLabelStyle: styles.tabLabel,
           tabBarItemStyle: styles.tabItem,
@@ -85,13 +86,13 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   headerButtonText: {
-    fontSize: 16,
-    color: '#3B82F6',
-    fontWeight: '500',
+    fontSize: typography.fontSizes.xl,
+    color: colors.accent,
+    fontWeight: typography.fontWeights.medium,
   },
   tabBar: {
-    backgroundColor: '#fff',
-    borderTopColor: '#E5E7EB',
+    backgroundColor: colors.background.card,
+    borderTopColor: colors.border.primary,
     height: 90,
     paddingBottom: 28,
     paddingTop: 8,
@@ -100,8 +101,8 @@ const styles = StyleSheet.create({
     paddingTop: 4,
   },
   tabLabel: {
-    fontSize: 11,
-    fontWeight: '500',
+    fontSize: typography.fontSizes.xs,
+    fontWeight: typography.fontWeights.medium,
     marginTop: 2,
   },
 });

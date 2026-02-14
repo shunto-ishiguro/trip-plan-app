@@ -1,5 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { colors, radius, spacing, typography } from '../theme';
 import type { ChecklistItem } from '../types';
 
 interface ChecklistItemRowProps {
@@ -33,38 +34,38 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    paddingHorizontal: 16,
+    backgroundColor: colors.background.card,
+    paddingHorizontal: spacing.lg,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: colors.border.secondary,
   },
   checkbox: {
     width: 24,
     height: 24,
-    borderRadius: 6,
+    borderRadius: radius.sm,
     borderWidth: 2,
-    borderColor: '#D1D5DB',
+    borderColor: colors.border.primary,
     marginRight: 14,
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkboxChecked: {
-    backgroundColor: '#3B82F6',
-    borderColor: '#3B82F6',
+    backgroundColor: colors.accent,
+    borderColor: colors.accent,
   },
   checkmark: {
     color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: typography.fontSizes.base,
+    fontWeight: typography.fontWeights.semibold,
   },
   text: {
     flex: 1,
-    fontSize: 15,
-    color: '#1F2937',
+    fontSize: typography.fontSizes.lg,
+    color: colors.text.primary,
   },
   textChecked: {
-    color: '#9CA3AF',
+    color: colors.text.quaternary,
     textDecorationLine: 'line-through',
   },
 });

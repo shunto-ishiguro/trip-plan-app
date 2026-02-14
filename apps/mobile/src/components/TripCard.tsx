@@ -1,4 +1,5 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { colors, radius, shadows, spacing, typography } from '../theme';
 import type { Trip } from '../types';
 
 interface TripCardProps {
@@ -51,49 +52,45 @@ export function TripCard({ trip, onPress }: TripCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginHorizontal: 16,
-    marginVertical: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
+    backgroundColor: colors.background.card,
+    borderRadius: radius.xl,
+    padding: spacing.lg,
+    marginHorizontal: spacing.lg,
+    marginVertical: spacing.md,
+    ...shadows.md,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: spacing.base,
   },
   title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1F2937',
+    fontSize: typography.fontSizes['2xl'],
+    fontWeight: typography.fontWeights.semibold,
+    color: colors.text.primary,
     flex: 1,
   },
   days: {
-    fontSize: 14,
-    color: '#3B82F6',
-    fontWeight: '500',
-    marginLeft: 8,
+    fontSize: typography.fontSizes.base,
+    color: colors.accent,
+    fontWeight: typography.fontWeights.medium,
+    marginLeft: spacing.md,
   },
   content: {
-    gap: 6,
+    gap: spacing.sm,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   label: {
-    fontSize: 13,
-    color: '#6B7280',
+    fontSize: typography.fontSizes.md,
+    color: colors.text.tertiary,
     width: 50,
   },
   value: {
-    fontSize: 14,
-    color: '#374151',
+    fontSize: typography.fontSizes.base,
+    color: colors.text.secondary,
   },
 });

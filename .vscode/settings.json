@@ -22,12 +22,6 @@
   "[css]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
-  "[go]": {
-    "editor.defaultFormatter": "golang.go",
-    "editor.formatOnSave": true
-  },
-  "go.lintTool": "golangci-lint",
-  "go.lintFlags": ["--fast"],
   "typescript.tsdk": "node_modules/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true
 }

@@ -13,7 +13,9 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { GradientButton } from '../components';
 import type { RootStackScreenProps } from '../navigation/types';
+import { colors, radius, spacing, typography } from '../theme';
 
 type Props = RootStackScreenProps<'AddChecklistItem'>;
 
@@ -98,7 +100,7 @@ export function AddChecklistItemScreen() {
             <Ionicons
               name={isPackingList ? 'bag-outline' : 'checkbox-outline'}
               size={20}
-              color="#3B82F6"
+              color={colors.accent}
             />
             <Text style={styles.typeIndicatorText}>
               {isPackingList ? '持ち物リスト' : 'やることリスト'}
@@ -112,7 +114,7 @@ export function AddChecklistItemScreen() {
               value={text}
               onChangeText={setText}
               placeholder={`例: ${isPackingList ? 'パスポート' : '航空券の予約'}`}
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.text.quaternary}
             />
           </View>
 
@@ -128,7 +130,9 @@ export function AddChecklistItemScreen() {
                     style={[styles.quickItem, isSelected && styles.quickItemSelected]}
                     onPress={() => toggleQuickItem(item)}
                   >
-                    {isSelected && <Ionicons name="checkmark-circle" size={18} color="#3B82F6" />}
+                    {isSelected && (
+                      <Ionicons name="checkmark-circle" size={18} color={colors.accent} />
+                    )}
                     <Text
                       style={[styles.quickItemText, isSelected && styles.quickItemTextSelected]}
                     >
@@ -148,9 +152,7 @@ export function AddChecklistItemScreen() {
         </ScrollView>
 
         <View style={styles.footer}>
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <Text style={styles.saveButtonText}>追加する</Text>
-          </TouchableOpacity>
+          <GradientButton onPress={handleSave} label="追加する" />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -160,7 +162,7 @@ export function AddChecklistItemScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.background.primary,
   },
   keyboardAvoid: {
     flex: 1,
@@ -169,102 +171,91 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: 20,
+    padding: spacing.xl,
     paddingBottom: 40,
   },
   typeIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    backgroundColor: '#EFF6FF',
-    borderRadius: 8,
+    gap: spacing.md,
+    marginBottom: spacing.xl,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.md,
+    backgroundColor: colors.accentLight,
+    borderRadius: radius.md,
     alignSelf: 'flex-start',
   },
   typeIndicatorText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#3B82F6',
+    fontSize: typography.fontSizes.base,
+    fontWeight: typography.fontWeights.semibold,
+    color: colors.accent,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: spacing['2xl'],
   },
   label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 8,
+    fontSize: typography.fontSizes.base,
+    fontWeight: typography.fontWeights.semibold,
+    color: colors.text.secondary,
+    marginBottom: spacing.md,
   },
   hint: {
-    fontSize: 12,
-    color: '#9CA3AF',
-    marginBottom: 12,
+    fontSize: typography.fontSizes.sm,
+    color: colors.text.quaternary,
+    marginBottom: spacing.base,
   },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.background.card,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 10,
+    borderColor: colors.border.primary,
+    borderRadius: radius.lg,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    fontSize: 16,
-    color: '#1F2937',
+    fontSize: typography.fontSizes.xl,
+    color: colors.text.primary,
   },
   quickItemsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: spacing.md,
   },
   quickItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    backgroundColor: '#fff',
+    gap: spacing.sm,
+    backgroundColor: colors.background.card,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: colors.border.primary,
     borderRadius: 20,
     paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingVertical: spacing.md,
   },
   quickItemSelected: {
-    backgroundColor: '#EFF6FF',
-    borderColor: '#3B82F6',
+    backgroundColor: colors.accentLight,
+    borderColor: colors.accent,
   },
   quickItemText: {
-    fontSize: 14,
-    color: '#374151',
+    fontSize: typography.fontSizes.base,
+    color: colors.text.secondary,
   },
   quickItemTextSelected: {
-    color: '#3B82F6',
-    fontWeight: '500',
+    color: colors.accent,
+    fontWeight: typography.fontWeights.medium,
   },
   selectedSection: {
-    backgroundColor: '#F3F4F6',
-    padding: 12,
-    borderRadius: 8,
+    backgroundColor: colors.background.elevated,
+    padding: spacing.base,
+    borderRadius: radius.md,
   },
   selectedTitle: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#374151',
+    fontSize: typography.fontSizes.base,
+    fontWeight: typography.fontWeights.medium,
+    color: colors.text.secondary,
   },
   footer: {
-    padding: 20,
-    backgroundColor: '#fff',
+    padding: spacing.xl,
+    backgroundColor: colors.background.card,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-  },
-  saveButton: {
-    backgroundColor: '#3B82F6',
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    borderTopColor: colors.border.primary,
   },
 });

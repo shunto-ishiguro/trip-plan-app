@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors, radius, spacing, typography } from '../theme';
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -75,8 +76,8 @@ export function SettingsScreen() {
               <Switch
                 value={notificationsEnabled}
                 onValueChange={setNotificationsEnabled}
-                trackColor={{ false: '#D1D5DB', true: '#93C5FD' }}
-                thumbColor={notificationsEnabled ? '#3B82F6' : '#F3F4F6'}
+                trackColor={{ false: colors.border.primary, true: colors.accentLight }}
+                thumbColor={notificationsEnabled ? colors.accent : colors.background.elevated}
               />
             </View>
             <View style={styles.rowDivider} />
@@ -85,8 +86,8 @@ export function SettingsScreen() {
               <Switch
                 value={reminderEnabled}
                 onValueChange={setReminderEnabled}
-                trackColor={{ false: '#D1D5DB', true: '#93C5FD' }}
-                thumbColor={reminderEnabled ? '#3B82F6' : '#F3F4F6'}
+                trackColor={{ false: colors.border.primary, true: colors.accentLight }}
+                thumbColor={reminderEnabled ? colors.accent : colors.background.elevated}
               />
             </View>
           </View>
@@ -133,75 +134,75 @@ export function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.background.primary,
   },
   scrollView: {
     flex: 1,
   },
   section: {
-    marginTop: 24,
-    paddingHorizontal: 16,
+    marginTop: spacing['2xl'],
+    paddingHorizontal: spacing.lg,
   },
   sectionTitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#6B7280',
-    marginBottom: 8,
-    marginLeft: 4,
+    fontSize: typography.fontSizes.md,
+    fontWeight: typography.fontWeights.semibold,
+    color: colors.text.tertiary,
+    marginBottom: spacing.md,
+    marginLeft: spacing.xs,
     textTransform: 'uppercase',
   },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: colors.background.card,
+    borderRadius: radius.xl,
     overflow: 'hidden',
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.lg,
     paddingVertical: 14,
   },
   rowDivider: {
     height: 1,
-    backgroundColor: '#F3F4F6',
-    marginLeft: 16,
+    backgroundColor: colors.border.secondary,
+    marginLeft: spacing.lg,
   },
   rowLabel: {
-    fontSize: 16,
-    color: '#1F2937',
+    fontSize: typography.fontSizes.xl,
+    color: colors.text.primary,
   },
   rowValue: {
-    fontSize: 15,
-    color: '#6B7280',
+    fontSize: typography.fontSizes.lg,
+    color: colors.text.tertiary,
   },
   rowArrow: {
-    fontSize: 16,
-    color: '#9CA3AF',
+    fontSize: typography.fontSizes.xl,
+    color: colors.text.quaternary,
   },
   logoutButton: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: colors.background.card,
+    borderRadius: radius.xl,
     paddingVertical: 14,
     alignItems: 'center',
   },
   logoutButtonText: {
-    fontSize: 16,
-    color: '#EF4444',
-    fontWeight: '500',
+    fontSize: typography.fontSizes.xl,
+    color: colors.semantic.error,
+    fontWeight: typography.fontWeights.medium,
   },
   appInfo: {
     alignItems: 'center',
     paddingVertical: 32,
   },
   appName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#374151',
+    fontSize: typography.fontSizes.xl,
+    fontWeight: typography.fontWeights.semibold,
+    color: colors.text.secondary,
   },
   appVersion: {
-    fontSize: 13,
-    color: '#9CA3AF',
-    marginTop: 4,
+    fontSize: typography.fontSizes.md,
+    color: colors.text.quaternary,
+    marginTop: spacing.xs,
   },
 });

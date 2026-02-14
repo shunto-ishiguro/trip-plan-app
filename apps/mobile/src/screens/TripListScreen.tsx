@@ -5,6 +5,7 @@ import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FAB, TripCard } from '../components';
 import type { RootStackParamList } from '../navigation/types';
+import { colors, spacing, typography } from '../theme';
 import type { Trip } from '../types';
 
 // モックデータ
@@ -100,22 +101,22 @@ export function TripListScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.background.primary,
   },
   header: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#fff',
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.lg,
+    backgroundColor: colors.background.card,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: colors.border.primary,
   },
   headerTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#1F2937',
+    fontSize: typography.fontSizes['5xl'],
+    fontWeight: typography.fontWeights.bold,
+    color: colors.text.primary,
   },
   listContainer: {
-    paddingVertical: 8,
+    paddingVertical: spacing.md,
     paddingBottom: 100,
   },
   emptyListContainer: {
@@ -129,17 +130,17 @@ const styles = StyleSheet.create({
   },
   emptyIcon: {
     fontSize: 64,
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#1F2937',
-    marginBottom: 8,
+    fontSize: typography.fontSizes['3xl'],
+    fontWeight: typography.fontWeights.semibold,
+    color: colors.text.primary,
+    marginBottom: spacing.md,
   },
   emptyText: {
-    fontSize: 15,
-    color: '#6B7280',
+    fontSize: typography.fontSizes.lg,
+    color: colors.text.tertiary,
     textAlign: 'center',
     lineHeight: 22,
   },

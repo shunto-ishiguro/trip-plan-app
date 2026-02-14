@@ -25,16 +25,6 @@ out/
 *.orig.*
 web-build/
 
-# Go
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-*.test
-*.out
-bin/
-
 # Testing
 coverage/
 

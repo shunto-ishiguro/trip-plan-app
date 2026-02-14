@@ -5,19 +5,9 @@ pre-commit:
       glob: "*.{js,jsx,ts,tsx,json,css}"
       run: pnpm biome check --write {staged_files}
       stage_fixed: true
-    go-fmt:
-      glob: "*.go"
-      root: "apps/api/"
-      run: gofmt -w {staged_files}
-      stage_fixed: true
 
 pre-push:
   parallel: true
   commands:
     biome-check:
       run: pnpm lint
-    go-lint:
-      root: "apps/api/"
-      run: |
-        export PATH=$PATH:$(go env GOPATH)/bin
-        golangci-lint run

@@ -1,8 +1,11 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { colors, gradients, radius, shadows, spacing, typography } from '../theme';
 import type { BudgetItem } from '../types';
 
 interface BudgetItemCardProps {
   item: BudgetItem;
+  memberCount: number;
   onPress: () => void;
 }
 
@@ -14,25 +17,25 @@ const CATEGORY_LABELS: Record<BudgetItem['category'], string> = {
   other: 'その他',
 };
 
-const CATEGORY_COLORS: Record<BudgetItem['category'], string> = {
-  transport: '#3B82F6',
-  accommodation: '#8B5CF6',
-  food: '#F59E0B',
-  activity: '#10B981',
-  other: '#6B7280',
-};
-
-export function BudgetItemCard({ item, onPress }: BudgetItemCardProps) {
+export function BudgetItemCard({ item, memberCount, onPress }: BudgetItemCardProps) {
   const formatAmount = (amount: number) => {
     return `¥${amount.toLocaleString()}`;
   };
 
+  const badgeGradient = gradients[item.category];
+  const isPerPerson = item.pricingType === 'per_person';
+
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
       <View style={styles.left}>
-        <View style={[styles.categoryBadge, { backgroundColor: CATEGORY_COLORS[item.category] }]}>
+        <LinearGradient
+          colors={[...badgeGradient]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.categoryBadge}
+        >
           <Text style={styles.categoryText}>{CATEGORY_LABELS[item.category]}</Text>
-        </View>
+        </LinearGradient>
         <View style={styles.info}>
           <Text style={styles.name} numberOfLines={1}>
             {item.name}
@@ -44,7 +47,10 @@ export function BudgetItemCard({ item, onPress }: BudgetItemCardProps) {
           )}
         </View>
       </View>
-      <Text style={styles.amount}>{formatAmount(item.amount)}</Text>
+      <View style={styles.amountContainer}>
+        <Text style={styles.amount}>{formatAmount(item.amount)}</Text>
+        <Text style={styles.pricingLabel}>{isPerPerson ? '/ 1人' : `/ ${memberCount}人`}</Text>
+      </View>
     </TouchableOpacity>
   );
 }
@@ -54,16 +60,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: colors.background.card,
+    borderRadius: radius.xl,
     padding: 14,
-    marginHorizontal: 16,
-    marginVertical: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    marginHorizontal: spacing.lg,
+    marginVertical: spacing.sm,
+    ...shadows.sm,
   },
   left: {
     flexDirection: 'row',
@@ -73,31 +75,39 @@ const styles = StyleSheet.create({
   categoryBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
-    marginRight: 12,
+    borderRadius: radius.xl,
+    marginRight: spacing.base,
   },
   categoryText: {
     color: '#fff',
-    fontSize: 12,
-    fontWeight: '500',
+    fontSize: typography.fontSizes.sm,
+    fontWeight: typography.fontWeights.medium,
   },
   info: {
     flex: 1,
   },
   name: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#1F2937',
+    fontSize: typography.fontSizes.lg,
+    fontWeight: typography.fontWeights.medium,
+    color: colors.text.primary,
   },
   memo: {
-    fontSize: 13,
-    color: '#6B7280',
+    fontSize: typography.fontSizes.md,
+    color: colors.text.tertiary,
     marginTop: 2,
   },
+  amountContainer: {
+    alignItems: 'flex-end',
+    marginLeft: spacing.md,
+  },
   amount: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1F2937',
-    marginLeft: 8,
+    fontSize: typography.fontSizes.xl,
+    fontWeight: typography.fontWeights.semibold,
+    color: colors.text.primary,
+  },
+  pricingLabel: {
+    fontSize: typography.fontSizes.xs,
+    color: colors.text.tertiary,
+    marginTop: 2,
   },
 });
