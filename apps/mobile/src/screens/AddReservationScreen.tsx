@@ -13,7 +13,9 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { GradientButton } from '../components';
 import type { RootStackScreenProps } from '../navigation/types';
+import { colors, radius, spacing, typography } from '../theme';
 import type { Reservation } from '../types';
 
 type Props = RootStackScreenProps<'AddReservation'>;
@@ -24,12 +26,32 @@ const RESERVATION_TYPES: {
   icon: keyof typeof Ionicons.glyphMap;
   color: string;
 }[] = [
-  { value: 'flight', label: '航空券', icon: 'airplane-outline', color: '#3B82F6' },
-  { value: 'hotel', label: 'ホテル', icon: 'bed-outline', color: '#8B5CF6' },
-  { value: 'rental_car', label: 'レンタカー', icon: 'car-outline', color: '#10B981' },
-  { value: 'restaurant', label: 'レストラン', icon: 'restaurant-outline', color: '#F59E0B' },
-  { value: 'activity', label: 'アクティビティ', icon: 'ticket-outline', color: '#EC4899' },
-  { value: 'other', label: 'その他', icon: 'document-text-outline', color: '#6B7280' },
+  { value: 'flight', label: '航空券', icon: 'airplane-outline', color: colors.reservation.flight },
+  { value: 'hotel', label: 'ホテル', icon: 'bed-outline', color: colors.reservation.hotel },
+  {
+    value: 'rental_car',
+    label: 'レンタカー',
+    icon: 'car-outline',
+    color: colors.reservation.rental_car,
+  },
+  {
+    value: 'restaurant',
+    label: 'レストラン',
+    icon: 'restaurant-outline',
+    color: colors.reservation.restaurant,
+  },
+  {
+    value: 'activity',
+    label: 'アクティビティ',
+    icon: 'ticket-outline',
+    color: colors.reservation.activity,
+  },
+  {
+    value: 'other',
+    label: 'その他',
+    icon: 'document-text-outline',
+    color: colors.reservation.other,
+  },
 ];
 
 export function AddReservationScreen() {
@@ -113,7 +135,7 @@ export function AddReservationScreen() {
               value={name}
               onChangeText={setName}
               placeholder={`例: ${selectedType?.label || '予約'}の名前`}
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.text.quaternary}
             />
           </View>
 
@@ -124,7 +146,7 @@ export function AddReservationScreen() {
               value={confirmationNumber}
               onChangeText={setConfirmationNumber}
               placeholder="例: ABC123XYZ"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.text.quaternary}
               autoCapitalize="characters"
             />
           </View>
@@ -137,7 +159,7 @@ export function AddReservationScreen() {
                 value={date}
                 onChangeText={setDate}
                 placeholder="YYYY-MM-DD"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={colors.text.quaternary}
               />
             </View>
             <View style={[styles.section, styles.flex1]}>
@@ -147,7 +169,7 @@ export function AddReservationScreen() {
                 value={time}
                 onChangeText={setTime}
                 placeholder="HH:MM"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={colors.text.quaternary}
               />
             </View>
           </View>
@@ -159,7 +181,7 @@ export function AddReservationScreen() {
               value={link}
               onChangeText={setLink}
               placeholder="https://..."
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.text.quaternary}
               keyboardType="url"
               autoCapitalize="none"
             />
@@ -172,7 +194,7 @@ export function AddReservationScreen() {
               value={memo}
               onChangeText={setMemo}
               placeholder="予約に関するメモ..."
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.text.quaternary}
               multiline
               numberOfLines={3}
               textAlignVertical="top"
@@ -181,9 +203,7 @@ export function AddReservationScreen() {
         </ScrollView>
 
         <View style={styles.footer}>
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <Text style={styles.saveButtonText}>追加する</Text>
-          </TouchableOpacity>
+          <GradientButton onPress={handleSave} label="追加する" />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -193,7 +213,7 @@ export function AddReservationScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.background.primary,
   },
   keyboardAvoid: {
     flex: 1,
@@ -202,15 +222,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: 20,
+    padding: spacing.xl,
     paddingBottom: 40,
   },
   section: {
-    marginBottom: 20,
+    marginBottom: spacing.xl,
   },
   row: {
     flexDirection: 'row',
-    gap: 16,
+    gap: spacing.lg,
   },
   flex1: {
     flex: 1,
@@ -219,10 +239,10 @@ const styles = StyleSheet.create({
     flex: 2,
   },
   label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 8,
+    fontSize: typography.fontSizes.base,
+    fontWeight: typography.fontWeights.semibold,
+    color: colors.text.secondary,
+    marginBottom: spacing.md,
   },
   typeGrid: {
     flexDirection: 'row',
@@ -232,13 +252,13 @@ const styles = StyleSheet.create({
   typeItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: colors.background.card,
     borderWidth: 2,
-    borderColor: '#E5E7EB',
-    borderRadius: 10,
-    paddingHorizontal: 12,
+    borderColor: colors.border.primary,
+    borderRadius: radius.lg,
+    paddingHorizontal: spacing.base,
     paddingVertical: 10,
-    gap: 8,
+    gap: spacing.md,
   },
   typeIcon: {
     width: 32,
@@ -248,39 +268,28 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   typeLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#374151',
+    fontSize: typography.fontSizes.base,
+    fontWeight: typography.fontWeights.medium,
+    color: colors.text.secondary,
   },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.background.card,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 10,
+    borderColor: colors.border.primary,
+    borderRadius: radius.lg,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    fontSize: 16,
-    color: '#1F2937',
+    fontSize: typography.fontSizes.xl,
+    color: colors.text.primary,
   },
   textArea: {
     minHeight: 80,
     paddingTop: 12,
   },
   footer: {
-    padding: 20,
-    backgroundColor: '#fff',
+    padding: spacing.xl,
+    backgroundColor: colors.background.card,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-  },
-  saveButton: {
-    backgroundColor: '#3B82F6',
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    borderTopColor: colors.border.primary,
   },
 });

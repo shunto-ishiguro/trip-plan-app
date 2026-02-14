@@ -13,7 +13,9 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { GradientButton } from '../components';
 import type { RootStackScreenProps } from '../navigation/types';
+import { colors, radius, spacing, typography } from '../theme';
 import type { BudgetItem } from '../types';
 
 type Props = RootStackScreenProps<'AddBudgetItem'>;
@@ -24,11 +26,26 @@ const CATEGORIES: {
   icon: keyof typeof Ionicons.glyphMap;
   color: string;
 }[] = [
-  { value: 'transport', label: '交通費', icon: 'car-outline', color: '#3B82F6' },
-  { value: 'accommodation', label: '宿泊費', icon: 'bed-outline', color: '#8B5CF6' },
-  { value: 'food', label: '食費', icon: 'restaurant-outline', color: '#F59E0B' },
-  { value: 'activity', label: 'アクティビティ', icon: 'ticket-outline', color: '#10B981' },
-  { value: 'other', label: 'その他', icon: 'ellipsis-horizontal-outline', color: '#6B7280' },
+  { value: 'transport', label: '交通費', icon: 'car-outline', color: colors.category.transport },
+  {
+    value: 'accommodation',
+    label: '宿泊費',
+    icon: 'bed-outline',
+    color: colors.category.accommodation,
+  },
+  { value: 'food', label: '食費', icon: 'restaurant-outline', color: colors.category.food },
+  {
+    value: 'activity',
+    label: 'アクティビティ',
+    icon: 'ticket-outline',
+    color: colors.category.activity,
+  },
+  {
+    value: 'other',
+    label: 'その他',
+    icon: 'ellipsis-horizontal-outline',
+    color: colors.category.other,
+  },
 ];
 
 export function AddBudgetItemScreen() {
@@ -39,6 +56,7 @@ export function AddBudgetItemScreen() {
   const [category, setCategory] = useState<BudgetItem['category']>('other');
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
+  const [pricingType, setPricingType] = useState<BudgetItem['pricingType']>('total');
   const [memo, setMemo] = useState('');
 
   const handleSave = () => {
@@ -57,6 +75,7 @@ export function AddBudgetItemScreen() {
       category,
       name,
       amount: parseInt(amount, 10),
+      pricingType,
       memo,
     });
 
@@ -109,7 +128,7 @@ export function AddBudgetItemScreen() {
               value={name}
               onChangeText={setName}
               placeholder="例: 新幹線（往復）"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.text.quaternary}
             />
           </View>
 
@@ -122,9 +141,57 @@ export function AddBudgetItemScreen() {
                 value={amount}
                 onChangeText={setAmount}
                 placeholder="0"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={colors.text.quaternary}
                 keyboardType="number-pad"
               />
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.label}>金額の種別</Text>
+            <View style={styles.pricingTypeRow}>
+              <TouchableOpacity
+                style={[
+                  styles.pricingTypeButton,
+                  pricingType === 'total' && styles.pricingTypeButtonActive,
+                ]}
+                onPress={() => setPricingType('total')}
+              >
+                <Ionicons
+                  name="people-outline"
+                  size={18}
+                  color={pricingType === 'total' ? colors.white : colors.text.tertiary}
+                />
+                <Text
+                  style={[
+                    styles.pricingTypeLabel,
+                    pricingType === 'total' && styles.pricingTypeLabelActive,
+                  ]}
+                >
+                  全体の金額
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.pricingTypeButton,
+                  pricingType === 'per_person' && styles.pricingTypeButtonActive,
+                ]}
+                onPress={() => setPricingType('per_person')}
+              >
+                <Ionicons
+                  name="person-outline"
+                  size={18}
+                  color={pricingType === 'per_person' ? colors.white : colors.text.tertiary}
+                />
+                <Text
+                  style={[
+                    styles.pricingTypeLabel,
+                    pricingType === 'per_person' && styles.pricingTypeLabelActive,
+                  ]}
+                >
+                  1人あたり
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -135,7 +202,7 @@ export function AddBudgetItemScreen() {
               value={memo}
               onChangeText={setMemo}
               placeholder="メモ..."
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.text.quaternary}
               multiline
               numberOfLines={3}
               textAlignVertical="top"
@@ -144,9 +211,7 @@ export function AddBudgetItemScreen() {
         </ScrollView>
 
         <View style={styles.footer}>
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <Text style={styles.saveButtonText}>追加する</Text>
-          </TouchableOpacity>
+          <GradientButton onPress={handleSave} label="追加する" />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -156,7 +221,7 @@ export function AddBudgetItemScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.background.primary,
   },
   keyboardAvoid: {
     flex: 1,
@@ -165,17 +230,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: 20,
+    padding: spacing.xl,
     paddingBottom: 40,
   },
   section: {
-    marginBottom: 20,
+    marginBottom: spacing.xl,
   },
   label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 8,
+    fontSize: typography.fontSizes.base,
+    fontWeight: typography.fontWeights.semibold,
+    color: colors.text.secondary,
+    marginBottom: spacing.md,
   },
   categoryGrid: {
     flexDirection: 'row',
@@ -185,13 +250,13 @@ const styles = StyleSheet.create({
   categoryItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: colors.background.card,
     borderWidth: 2,
-    borderColor: '#E5E7EB',
-    borderRadius: 10,
-    paddingHorizontal: 12,
+    borderColor: colors.border.primary,
+    borderRadius: radius.lg,
+    paddingHorizontal: spacing.base,
     paddingVertical: 10,
-    gap: 8,
+    gap: spacing.md,
   },
   categoryIcon: {
     width: 32,
@@ -201,61 +266,78 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   categoryLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#374151',
+    fontSize: typography.fontSizes.base,
+    fontWeight: typography.fontWeights.medium,
+    color: colors.text.secondary,
   },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.background.card,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 10,
+    borderColor: colors.border.primary,
+    borderRadius: radius.lg,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    fontSize: 16,
-    color: '#1F2937',
+    fontSize: typography.fontSizes.xl,
+    color: colors.text.primary,
   },
   amountInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: colors.background.card,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 10,
+    borderColor: colors.border.primary,
+    borderRadius: radius.lg,
     paddingHorizontal: 14,
   },
   currencySymbol: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#374151',
-    marginRight: 4,
+    fontSize: typography.fontSizes['2xl'],
+    fontWeight: typography.fontWeights.semibold,
+    color: colors.text.secondary,
+    marginRight: spacing.xs,
   },
   amountInput: {
     flex: 1,
     paddingVertical: 12,
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1F2937',
+    fontSize: typography.fontSizes['2xl'],
+    fontWeight: typography.fontWeights.semibold,
+    color: colors.text.primary,
+  },
+  pricingTypeRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  pricingTypeButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.background.card,
+    borderWidth: 2,
+    borderColor: colors.border.primary,
+    borderRadius: radius.lg,
+    paddingVertical: 12,
+  },
+  pricingTypeButtonActive: {
+    backgroundColor: colors.accent,
+    borderColor: colors.accent,
+  },
+  pricingTypeLabel: {
+    fontSize: typography.fontSizes.base,
+    fontWeight: typography.fontWeights.medium,
+    color: colors.text.secondary,
+  },
+  pricingTypeLabelActive: {
+    color: colors.white,
   },
   textArea: {
     minHeight: 80,
     paddingTop: 12,
   },
   footer: {
-    padding: 20,
-    backgroundColor: '#fff',
+    padding: spacing.xl,
+    backgroundColor: colors.background.card,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-  },
-  saveButton: {
-    backgroundColor: '#3B82F6',
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    borderTopColor: colors.border.primary,
   },
 });

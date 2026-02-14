@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 import { FAB, ReservationCard } from '../components';
 import type { TripTabScreenProps } from '../navigation/types';
+import { colors, spacing, typography } from '../theme';
 import type { Reservation } from '../types';
 
 // モックデータ
@@ -141,7 +142,7 @@ export function ReservationsScreen() {
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={() => (
           <View style={styles.emptyContainer}>
-            <Ionicons name="document-text-outline" size={48} color="#9CA3AF" />
+            <Ionicons name="document-text-outline" size={48} color={colors.text.quaternary} />
             <Text style={styles.emptyText}>
               予約情報がありません{'\n'}+ ボタンから追加しましょう
             </Text>
@@ -157,30 +158,30 @@ export function ReservationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.background.primary,
   },
   listContent: {
     paddingBottom: 100,
   },
   sectionHeader: {
-    backgroundColor: '#F3F4F6',
-    paddingHorizontal: 16,
+    backgroundColor: colors.background.elevated,
+    paddingHorizontal: spacing.lg,
     paddingVertical: 10,
-    marginTop: 8,
+    marginTop: spacing.md,
   },
   sectionHeaderText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
+    fontSize: typography.fontSizes.base,
+    fontWeight: typography.fontWeights.semibold,
+    color: colors.text.secondary,
   },
   emptyContainer: {
     alignItems: 'center',
     paddingTop: 80,
   },
   emptyText: {
-    marginTop: 12,
-    fontSize: 15,
-    color: '#6B7280',
+    marginTop: spacing.base,
+    fontSize: typography.fontSizes.lg,
+    color: colors.text.tertiary,
     textAlign: 'center',
     lineHeight: 22,
   },

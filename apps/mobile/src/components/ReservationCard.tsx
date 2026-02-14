@@ -1,7 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { colors, gradients, radius, shadows, spacing, typography } from '../theme';
 import type { Reservation } from '../types';
 
 type IoniconsName = keyof typeof Ionicons.glyphMap;
@@ -29,13 +31,13 @@ const TYPE_ICONS: Record<Reservation['type'], IoniconsName> = {
   other: 'document-text-outline',
 };
 
-const TYPE_COLORS: Record<Reservation['type'], string> = {
-  flight: '#3B82F6',
-  hotel: '#8B5CF6',
-  rental_car: '#10B981',
-  restaurant: '#F59E0B',
-  activity: '#EC4899',
-  other: '#6B7280',
+const TYPE_GRADIENT_KEYS: Record<Reservation['type'], keyof typeof gradients> = {
+  flight: 'flight',
+  hotel: 'hotel',
+  rental_car: 'rental_car',
+  restaurant: 'restaurant',
+  activity: 'activityReservation',
+  other: 'otherReservation',
 };
 
 export function ReservationCard({ reservation, onPress }: ReservationCardProps) {
@@ -52,16 +54,25 @@ export function ReservationCard({ reservation, onPress }: ReservationCardProps) 
     return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
   };
 
+  const badgeGradient = gradients[TYPE_GRADIENT_KEYS[reservation.type]];
+
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
       <View style={styles.header}>
-        <Ionicons
-          name={TYPE_ICONS[reservation.type]}
-          size={18}
-          color={TYPE_COLORS[reservation.type]}
-          style={styles.icon}
-        />
-        <Text style={styles.type}>{TYPE_LABELS[reservation.type]}</Text>
+        <LinearGradient
+          colors={[...badgeGradient]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.typeBadge}
+        >
+          <Ionicons
+            name={TYPE_ICONS[reservation.type]}
+            size={14}
+            color="#fff"
+            style={styles.typeIcon}
+          />
+          <Text style={styles.typeText}>{TYPE_LABELS[reservation.type]}</Text>
+        </LinearGradient>
         {reservation.datetime && (
           <Text style={styles.datetime}>{formatDatetime(reservation.datetime)}</Text>
         )}
@@ -91,69 +102,72 @@ export function ReservationCard({ reservation, onPress }: ReservationCardProps) 
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: colors.background.card,
+    borderRadius: radius.xl,
     padding: 14,
-    marginHorizontal: 16,
-    marginVertical: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    marginHorizontal: spacing.lg,
+    marginVertical: spacing.sm,
+    ...shadows.sm,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: spacing.md,
   },
-  icon: {
-    marginRight: 6,
+  typeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: radius.xl,
   },
-  type: {
-    fontSize: 13,
-    color: '#6B7280',
-    fontWeight: '500',
+  typeIcon: {
+    marginRight: 4,
+  },
+  typeText: {
+    fontSize: typography.fontSizes.sm,
+    color: '#fff',
+    fontWeight: typography.fontWeights.medium,
   },
   datetime: {
-    fontSize: 13,
-    color: '#3B82F6',
+    fontSize: typography.fontSizes.md,
+    color: colors.accent,
     marginLeft: 'auto',
-    fontWeight: '500',
+    fontWeight: typography.fontWeights.medium,
   },
   name: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1F2937',
-    marginBottom: 8,
+    fontSize: typography.fontSizes.xl,
+    fontWeight: typography.fontWeights.semibold,
+    color: colors.text.primary,
+    marginBottom: spacing.md,
   },
   confirmationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
-    borderRadius: 8,
+    backgroundColor: colors.background.elevated,
+    borderRadius: radius.md,
     padding: 10,
-    marginBottom: 8,
+    marginBottom: spacing.md,
   },
   confirmationLabel: {
-    fontSize: 12,
-    color: '#6B7280',
-    marginRight: 8,
+    fontSize: typography.fontSizes.sm,
+    color: colors.text.tertiary,
+    marginRight: spacing.md,
   },
   confirmationNumber: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1F2937',
+    fontSize: typography.fontSizes.base,
+    fontWeight: typography.fontWeights.semibold,
+    color: colors.text.primary,
     fontFamily: 'monospace',
   },
   copyHint: {
-    fontSize: 11,
-    color: '#9CA3AF',
+    fontSize: typography.fontSizes.xs,
+    color: colors.text.quaternary,
     marginLeft: 'auto',
   },
   memo: {
-    fontSize: 13,
-    color: '#6B7280',
+    fontSize: typography.fontSizes.md,
+    color: colors.text.tertiary,
     fontStyle: 'italic',
   },
 });

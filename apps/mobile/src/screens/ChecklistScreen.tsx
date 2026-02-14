@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ChecklistItemRow, FAB } from '../components';
 import type { TripTabScreenProps } from '../navigation/types';
+import { colors, spacing, typography } from '../theme';
 import type { ChecklistItem } from '../types';
 
 // モックデータ
@@ -131,13 +132,13 @@ export function ChecklistScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.background.primary,
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: colors.background.card,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: colors.border.primary,
   },
   tab: {
     flex: 1,
@@ -147,46 +148,46 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent',
   },
   tabActive: {
-    borderBottomColor: '#3B82F6',
+    borderBottomColor: colors.accent,
   },
   tabText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#6B7280',
+    fontSize: typography.fontSizes.lg,
+    fontWeight: typography.fontWeights.medium,
+    color: colors.text.tertiary,
   },
   tabTextActive: {
-    color: '#3B82F6',
+    color: colors.accent,
   },
   progressContainer: {
-    backgroundColor: '#fff',
-    padding: 16,
+    backgroundColor: colors.background.card,
+    padding: spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: colors.border.primary,
   },
   progressHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: spacing.md,
   },
   progressText: {
-    fontSize: 14,
-    color: '#374151',
+    fontSize: typography.fontSizes.base,
+    color: colors.text.secondary,
   },
   progressPercent: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#3B82F6',
+    fontSize: typography.fontSizes.base,
+    fontWeight: typography.fontWeights.semibold,
+    color: colors.accent,
   },
   progressBar: {
     height: 8,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: colors.border.primary,
     borderRadius: 4,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#3B82F6',
+    backgroundColor: colors.accent,
     borderRadius: 4,
   },
   listContent: {
@@ -198,11 +199,11 @@ const styles = StyleSheet.create({
   },
   emptyIcon: {
     fontSize: 48,
-    marginBottom: 12,
+    marginBottom: spacing.base,
   },
   emptyText: {
-    fontSize: 15,
-    color: '#6B7280',
+    fontSize: typography.fontSizes.lg,
+    color: colors.text.tertiary,
     textAlign: 'center',
     lineHeight: 22,
   },

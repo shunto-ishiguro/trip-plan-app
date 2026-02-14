@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { FAB, SpotCard } from '../components';
 import type { TripTabScreenProps } from '../navigation/types';
+import { colors, spacing, typography } from '../theme';
 import type { Spot } from '../types';
 
 // モックデータ
@@ -165,38 +166,38 @@ export function ScheduleScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.background.primary,
   },
   dayTabsContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.background.card,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: colors.border.primary,
   },
   dayTabs: {
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    gap: 8,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.base,
+    gap: spacing.md,
     flexDirection: 'row',
   },
   dayTab: {
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.xl,
     paddingVertical: 10,
     borderRadius: 20,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.background.elevated,
   },
   dayTabActive: {
-    backgroundColor: '#3B82F6',
+    backgroundColor: colors.accent,
   },
   dayTabText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#6B7280',
+    fontSize: typography.fontSizes.base,
+    fontWeight: typography.fontWeights.semibold,
+    color: colors.text.tertiary,
   },
   dayTabTextActive: {
     color: '#fff',
   },
   listContent: {
-    paddingVertical: 12,
+    paddingVertical: spacing.base,
     paddingBottom: 100,
   },
   emptyContainer: {
@@ -207,11 +208,11 @@ const styles = StyleSheet.create({
   },
   emptyIcon: {
     fontSize: 48,
-    marginBottom: 12,
+    marginBottom: spacing.base,
   },
   emptyText: {
-    fontSize: 15,
-    color: '#6B7280',
+    fontSize: typography.fontSizes.lg,
+    color: colors.text.tertiary,
     textAlign: 'center',
     lineHeight: 22,
   },

@@ -11,6 +11,7 @@ import {
   TripCreateScreen,
   TripListScreen,
 } from '../screens';
+import { colors, typography } from '../theme';
 import { TripTabNavigator } from './TripTabNavigator';
 import type { RootStackParamList } from './types';
 
@@ -22,11 +23,11 @@ export function RootNavigator() {
       <Stack.Navigator
         screenOptions={{
           headerStyle: {
-            backgroundColor: '#fff',
+            backgroundColor: colors.background.card,
           },
-          headerTintColor: '#1F2937',
+          headerTintColor: colors.text.primary,
           headerTitleStyle: {
-            fontWeight: '600',
+            fontWeight: typography.fontWeights.semibold,
           },
           headerShadowVisible: false,
           headerBackTitle: '',
@@ -43,7 +44,7 @@ export function RootNavigator() {
                 style={styles.settingsButton}
                 onPress={() => navigation.navigate('Settings')}
               >
-                <Ionicons name="settings-outline" size={24} color="#1F2937" />
+                <Ionicons name="settings-outline" size={24} color={colors.text.primary} />
               </TouchableOpacity>
             ),
             headerLeft: () => null,

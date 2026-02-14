@@ -8,11 +8,12 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { GradientButton } from '../components';
 import type { RootStackScreenProps } from '../navigation/types';
+import { colors, radius, spacing, typography } from '../theme';
 
 type Props = RootStackScreenProps<'TripCreate'> | RootStackScreenProps<'TripEdit'>;
 
@@ -64,7 +65,7 @@ export function TripCreateScreen() {
               value={title}
               onChangeText={setTitle}
               placeholder="例: 京都旅行"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.text.quaternary}
             />
           </View>
 
@@ -76,7 +77,7 @@ export function TripCreateScreen() {
                 value={startDate}
                 onChangeText={setStartDate}
                 placeholder="YYYY-MM-DD"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={colors.text.quaternary}
               />
             </View>
             <View style={[styles.section, styles.halfSection]}>
@@ -86,7 +87,7 @@ export function TripCreateScreen() {
                 value={endDate}
                 onChangeText={setEndDate}
                 placeholder="YYYY-MM-DD"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={colors.text.quaternary}
               />
             </View>
           </View>
@@ -99,7 +100,7 @@ export function TripCreateScreen() {
               onChangeText={setMemberCount}
               keyboardType="number-pad"
               placeholder="2"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.text.quaternary}
             />
           </View>
 
@@ -110,7 +111,7 @@ export function TripCreateScreen() {
               value={memo}
               onChangeText={setMemo}
               placeholder="旅行に関するメモ..."
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.text.quaternary}
               multiline
               numberOfLines={4}
               textAlignVertical="top"
@@ -119,9 +120,7 @@ export function TripCreateScreen() {
         </ScrollView>
 
         <View style={styles.footer}>
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <Text style={styles.saveButtonText}>{isEdit ? '更新する' : '作成する'}</Text>
-          </TouchableOpacity>
+          <GradientButton onPress={handleSave} label={isEdit ? '更新する' : '作成する'} />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -131,7 +130,7 @@ export function TripCreateScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.background.primary,
   },
   keyboardAvoid: {
     flex: 1,
@@ -140,54 +139,43 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: 20,
+    padding: spacing.xl,
     paddingBottom: 40,
   },
   section: {
-    marginBottom: 20,
+    marginBottom: spacing.xl,
   },
   row: {
     flexDirection: 'row',
-    gap: 16,
+    gap: spacing.lg,
   },
   halfSection: {
     flex: 1,
   },
   label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 8,
+    fontSize: typography.fontSizes.base,
+    fontWeight: typography.fontWeights.semibold,
+    color: colors.text.secondary,
+    marginBottom: spacing.md,
   },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.background.card,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 10,
+    borderColor: colors.border.primary,
+    borderRadius: radius.lg,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    fontSize: 16,
-    color: '#1F2937',
+    fontSize: typography.fontSizes.xl,
+    color: colors.text.primary,
   },
   textArea: {
     minHeight: 100,
     paddingTop: 12,
   },
   footer: {
-    padding: 20,
-    backgroundColor: '#fff',
+    padding: spacing.xl,
+    backgroundColor: colors.background.card,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-  },
-  saveButton: {
-    backgroundColor: '#3B82F6',
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    borderTopColor: colors.border.primary,
   },
 });

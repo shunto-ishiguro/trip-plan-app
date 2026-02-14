@@ -1,12 +1,26 @@
 # API
 
-Trip Plan AppのバックエンドAPI（Go / Gin）
+Trip Plan App のバックエンド API（Elysia.js / Bun）
 
 ## 技術スタック
 
-- Go 1.24+
-- Gin Web Framework
-- golangci-lint
+- Elysia.js (Bun runtime)
+- Drizzle ORM (PostgreSQL)
+- Supabase (Auth + Realtime)
+- TypeScript
+
+## アーキテクチャ
+
+```
+Mobile App ── REST + WebSocket ──→ Elysia.js
+                                      ├── Drizzle ORM ──→ PostgreSQL (CRUD)
+                                      └── Supabase Realtime ←── PostgreSQL (変更検知 → WS リレー)
+```
+
+- **REST API**: Elysia.js でバリデーション・ビジネスロジックを処理
+- **DB**: Drizzle ORM で PostgreSQL に直接アクセス
+- **Realtime**: API が Supabase Realtime を購読し、WebSocket で Mobile にリレー
+- **Auth**: Supabase Auth でユーザー認証
 
 ## 開発
 
@@ -16,34 +30,23 @@ pnpm dev:api
 
 # または直接
 cd apps/api
-go run main.go
+bun run dev
 ```
 
-http://localhost:8080 で起動
+http://localhost:3000 で起動
 
 ## エンドポイント
 
 | メソッド | パス | 説明 |
 |---------|------|------|
 | GET | `/health` | ヘルスチェック |
-| GET | `/api/v1/` | API情報 |
+| GET | `/api/v1/` | API 情報 |
 
-## ビルド
-
-```bash
-cd apps/api
-go build -o bin/api main.go
-```
-
-## Lint
+## DB コマンド
 
 ```bash
-golangci-lint run
-```
-
-## 依存関係
-
-```bash
-go mod download    # インストール
-go mod tidy        # 整理
+pnpm --filter api run db:push       # スキーマを DB に反映
+pnpm --filter api run db:generate   # マイグレーション生成
+pnpm --filter api run db:migrate    # マイグレーション実行
+pnpm --filter api run db:studio     # Drizzle Studio 起動
 ```
