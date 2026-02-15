@@ -6,6 +6,7 @@ import {
   pgTable,
   text,
   timestamp,
+  unique,
   uuid,
 } from 'drizzle-orm/pg-core';
 
@@ -34,6 +35,8 @@ export const reservationTypeEnum = pgEnum('reservation_type', [
 
 export const sharePermissionEnum = pgEnum('share_permission', ['view', 'edit']);
 
+export const tripRoleEnum = pgEnum('trip_role', ['owner', 'editor', 'viewer']);
+
 // --- Tables ---
 
 export const trips = pgTable('trips', {
@@ -44,6 +47,7 @@ export const trips = pgTable('trips', {
   endDate: text('end_date').notNull(),
   memberCount: integer('member_count').notNull().default(1),
   memo: text('memo'),
+  ownerId: uuid('owner_id'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true })
     .notNull()
@@ -108,6 +112,23 @@ export const shareSettings = pgTable('share_settings', {
     .notNull()
     .references(() => trips.id, { onDelete: 'cascade' })
     .unique(),
-  shareUrl: text('share_url').notNull(),
+  shareUrl: text('share_url'),
   permission: sharePermissionEnum('permission').notNull().default('view'),
+  shareToken: text('share_token').notNull().unique(),
+  isActive: boolean('is_active').notNull().default(true),
+  createdBy: uuid('created_by'),
 });
+
+export const tripMembers = pgTable(
+  'trip_members',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    tripId: uuid('trip_id')
+      .notNull()
+      .references(() => trips.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id').notNull(),
+    role: tripRoleEnum('role').notNull().default('viewer'),
+    joinedAt: timestamp('joined_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [unique('trip_members_trip_user_unique').on(table.tripId, table.userId)],
+);

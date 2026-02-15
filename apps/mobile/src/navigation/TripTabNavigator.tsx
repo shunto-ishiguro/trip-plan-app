@@ -5,6 +5,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ShareSheet } from '../components';
+import { TripProvider } from '../contexts/TripContext';
 import { BudgetScreen, ChecklistScreen, ReservationsScreen, ScheduleScreen } from '../screens';
 import { colors, typography } from '../theme';
 import type { RootStackParamList, TripTabParamList } from './types';
@@ -30,7 +31,7 @@ const TAB_LABELS: Record<keyof TripTabParamList, string> = {
 export function TripTabNavigator() {
   const route = useRoute();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { tripId } = route.params as { tripId: string };
+  const { tripId, tripTitle } = route.params as { tripId: string; tripTitle?: string };
 
   const [shareVisible, setShareVisible] = useState(false);
 
@@ -46,34 +47,40 @@ export function TripTabNavigator() {
   }, [navigation]);
 
   return (
-    <View style={styles.container}>
-      <Tab.Navigator
-        screenOptions={({ route }) => ({
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name={TAB_ICONS[route.name]} size={size} color={color} />
-          ),
-          tabBarLabel: TAB_LABELS[route.name],
-          tabBarActiveTintColor: colors.accent,
-          tabBarInactiveTintColor: colors.text.tertiary,
-          tabBarStyle: styles.tabBar,
-          tabBarLabelStyle: styles.tabLabel,
-          tabBarItemStyle: styles.tabItem,
-        })}
-      >
-        <Tab.Screen name="Schedule" component={ScheduleScreen} initialParams={{ tripId }} />
-        <Tab.Screen name="Budget" component={BudgetScreen} initialParams={{ tripId }} />
-        <Tab.Screen name="Checklist" component={ChecklistScreen} initialParams={{ tripId }} />
-        <Tab.Screen name="Reservations" component={ReservationsScreen} initialParams={{ tripId }} />
-      </Tab.Navigator>
+    <TripProvider tripId={tripId}>
+      <View style={styles.container}>
+        <Tab.Navigator
+          screenOptions={({ route }) => ({
+            headerShown: false,
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name={TAB_ICONS[route.name]} size={size} color={color} />
+            ),
+            tabBarLabel: TAB_LABELS[route.name],
+            tabBarActiveTintColor: colors.accent,
+            tabBarInactiveTintColor: colors.text.tertiary,
+            tabBarStyle: styles.tabBar,
+            tabBarLabelStyle: styles.tabLabel,
+            tabBarItemStyle: styles.tabItem,
+          })}
+        >
+          <Tab.Screen name="Schedule" component={ScheduleScreen} initialParams={{ tripId }} />
+          <Tab.Screen name="Budget" component={BudgetScreen} initialParams={{ tripId }} />
+          <Tab.Screen name="Checklist" component={ChecklistScreen} initialParams={{ tripId }} />
+          <Tab.Screen
+            name="Reservations"
+            component={ReservationsScreen}
+            initialParams={{ tripId }}
+          />
+        </Tab.Navigator>
 
-      <ShareSheet
-        visible={shareVisible}
-        onClose={() => setShareVisible(false)}
-        tripId={tripId}
-        tripTitle="京都旅行"
-      />
-    </View>
+        <ShareSheet
+          visible={shareVisible}
+          onClose={() => setShareVisible(false)}
+          tripId={tripId}
+          tripTitle={tripTitle ?? '旅行'}
+        />
+      </View>
+    </TripProvider>
   );
 }
 

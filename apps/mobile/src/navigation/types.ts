@@ -2,17 +2,24 @@ import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { CompositeScreenProps, NavigatorScreenParams } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
+// 認証スタックのパラメータ
+export type AuthStackParamList = {
+  Login: undefined;
+  Signup: undefined;
+};
+
 // メインスタックのパラメータ
 export type RootStackParamList = {
   Main: NavigatorScreenParams<MainTabParamList>;
   TripCreate: undefined;
   TripEdit: { tripId: string };
-  TripDetail: NavigatorScreenParams<TripTabParamList> & { tripId: string };
+  TripDetail: NavigatorScreenParams<TripTabParamList> & { tripId: string; tripTitle?: string };
   Settings: undefined;
   AddSpot: { tripId: string; dayIndex: number };
   AddBudgetItem: { tripId: string };
   AddChecklistItem: { tripId: string; type: 'packing' | 'todo' };
   AddReservation: { tripId: string };
+  JoinTrip: undefined;
 };
 
 // メインタブのパラメータ

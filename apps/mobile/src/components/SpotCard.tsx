@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   orderText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: typography.fontSizes.base,
     fontWeight: typography.fontWeights.semibold,
   },

@@ -13,7 +13,8 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { GradientButton } from '../components';
+import * as budgetItemsApi from '../api/budgetItems';
+import { FormInput, GradientButton } from '../components';
 import type { RootStackScreenProps } from '../navigation/types';
 import { colors, radius, spacing, typography } from '../theme';
 import type { BudgetItem } from '../types';
@@ -58,8 +59,9 @@ export function AddBudgetItemScreen() {
   const [amount, setAmount] = useState('');
   const [pricingType, setPricingType] = useState<BudgetItem['pricingType']>('total');
   const [memo, setMemo] = useState('');
+  const [saving, setSaving] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!name.trim()) {
       Alert.alert('エラー', '項目名を入力してください');
       return;
@@ -69,17 +71,21 @@ export function AddBudgetItemScreen() {
       return;
     }
 
-    // TODO: API呼び出し
-    console.log({
-      tripId,
-      category,
-      name,
-      amount: parseInt(amount, 10),
-      pricingType,
-      memo,
-    });
-
-    navigation.goBack();
+    setSaving(true);
+    try {
+      await budgetItemsApi.createBudgetItem(tripId, {
+        category,
+        name,
+        amount: Number.parseInt(amount, 10),
+        pricingType,
+        memo: memo || null,
+      });
+      navigation.goBack();
+    } catch {
+      Alert.alert('エラー', '保存に失敗しました');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -109,7 +115,7 @@ export function AddBudgetItemScreen() {
                   onPress={() => setCategory(cat.value)}
                 >
                   <View style={[styles.categoryIcon, { backgroundColor: cat.color }]}>
-                    <Ionicons name={cat.icon} size={20} color="#fff" />
+                    <Ionicons name={cat.icon} size={20} color={colors.white} />
                   </View>
                   <Text
                     style={[styles.categoryLabel, category === cat.value && { color: cat.color }]}
@@ -121,16 +127,12 @@ export function AddBudgetItemScreen() {
             </View>
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.label}>項目名 *</Text>
-            <TextInput
-              style={styles.input}
-              value={name}
-              onChangeText={setName}
-              placeholder="例: 新幹線（往復）"
-              placeholderTextColor={colors.text.quaternary}
-            />
-          </View>
+          <FormInput
+            label="項目名 *"
+            value={name}
+            onChangeText={setName}
+            placeholder="例: 新幹線（往復）"
+          />
 
           <View style={styles.section}>
             <Text style={styles.label}>金額 *</Text>
@@ -195,23 +197,22 @@ export function AddBudgetItemScreen() {
             </View>
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.label}>メモ</Text>
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              value={memo}
-              onChangeText={setMemo}
-              placeholder="メモ..."
-              placeholderTextColor={colors.text.quaternary}
-              multiline
-              numberOfLines={3}
-              textAlignVertical="top"
-            />
-          </View>
+          <FormInput
+            label="メモ"
+            value={memo}
+            onChangeText={setMemo}
+            placeholder="メモ..."
+            multiline
+            numberOfLines={3}
+          />
         </ScrollView>
 
         <View style={styles.footer}>
-          <GradientButton onPress={handleSave} label="追加する" />
+          <GradientButton
+            onPress={handleSave}
+            label={saving ? '保存中...' : '追加する'}
+            disabled={saving}
+          />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -231,7 +232,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing.xl,
-    paddingBottom: 40,
+    paddingBottom: spacing['5xl'],
   },
   section: {
     marginBottom: spacing.xl,
@@ -329,10 +330,6 @@ const styles = StyleSheet.create({
   },
   pricingTypeLabelActive: {
     color: colors.white,
-  },
-  textArea: {
-    minHeight: 80,
-    paddingTop: 12,
   },
   footer: {
     padding: spacing.xl,

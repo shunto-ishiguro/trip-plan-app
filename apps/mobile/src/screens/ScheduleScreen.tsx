@@ -1,6 +1,7 @@
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { useState } from 'react';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import { useCallback, useMemo, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
   ScrollView,
@@ -9,82 +10,14 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { FAB, SpotCard } from '../components';
-import type { TripTabScreenProps } from '../navigation/types';
-import { colors, spacing, typography } from '../theme';
-import type { Spot } from '../types';
 
-// モックデータ
-const MOCK_SPOTS: Record<number, Spot[]> = {
-  0: [
-    {
-      id: '1',
-      tripId: '1',
-      dayIndex: 0,
-      order: 0,
-      name: '京都駅',
-      address: '京都府京都市下京区',
-      startTime: '10:00',
-      memo: '新幹線到着',
-    },
-    {
-      id: '2',
-      tripId: '1',
-      dayIndex: 0,
-      order: 1,
-      name: '清水寺',
-      address: '京都府京都市東山区清水1丁目294',
-      startTime: '11:30',
-      endTime: '13:00',
-    },
-    {
-      id: '3',
-      tripId: '1',
-      dayIndex: 0,
-      order: 2,
-      name: '祇園',
-      address: '京都府京都市東山区祇園町',
-      startTime: '14:00',
-      endTime: '16:00',
-      memo: '昼食とお散歩',
-    },
-  ],
-  1: [
-    {
-      id: '4',
-      tripId: '1',
-      dayIndex: 1,
-      order: 0,
-      name: '金閣寺',
-      address: '京都府京都市北区金閣寺町1',
-      startTime: '09:00',
-      endTime: '10:30',
-    },
-    {
-      id: '5',
-      tripId: '1',
-      dayIndex: 1,
-      order: 1,
-      name: '嵐山',
-      address: '京都府京都市右京区嵯峨',
-      startTime: '12:00',
-      endTime: '16:00',
-      memo: '竹林の道を散策',
-    },
-  ],
-  2: [
-    {
-      id: '6',
-      tripId: '1',
-      dayIndex: 2,
-      order: 0,
-      name: '伏見稲荷大社',
-      address: '京都府京都市伏見区深草藪之内町68',
-      startTime: '09:00',
-      endTime: '11:00',
-    },
-  ],
-};
+import * as spotsApi from '../api/spots';
+import { EmptyState, FAB, SpotCard } from '../components';
+import { useTrip } from '../contexts/TripContext';
+import { useDeleteConfirmation } from '../hooks/useDeleteConfirmation';
+import type { TripTabScreenProps } from '../navigation/types';
+import { colors, radius, spacing, typography } from '../theme';
+import type { Spot } from '../types';
 
 type Props = TripTabScreenProps<'Schedule'>;
 
@@ -93,21 +26,49 @@ export function ScheduleScreen() {
   const route = useRoute<Props['route']>();
   const { tripId } = route.params;
 
-  const [selectedDay, setSelectedDay] = useState(0);
-  const days = [0, 1, 2]; // TODO: 実際の日数を計算
+  const { trip } = useTrip();
 
-  const spots = MOCK_SPOTS[selectedDay] || [];
+  const days = useMemo(() => {
+    if (!trip) return [0];
+    const start = new Date(trip.startDate);
+    const end = new Date(trip.endDate);
+    const diffDays = Math.max(1, Math.round((end.getTime() - start.getTime()) / 86400000) + 1);
+    return Array.from({ length: diffDays }, (_, i) => i);
+  }, [trip]);
+
+  const [selectedDay, setSelectedDay] = useState(0);
+  const [spots, setSpots] = useState<Spot[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchSpots = useCallback(async () => {
+    try {
+      const data = await spotsApi.getSpots(tripId, selectedDay);
+      setSpots(data);
+    } catch {
+      setSpots([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [tripId, selectedDay]);
+
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true);
+      fetchSpots();
+    }, [fetchSpots]),
+  );
 
   const handleSpotPress = (spot: Spot) => {
     Alert.alert(spot.name, spot.memo || spot.address || '');
   };
 
+  const { confirmDelete } = useDeleteConfirmation<Spot>(
+    (id) => spotsApi.deleteSpot(tripId, id),
+    setSpots,
+  );
+
   const handleSpotLongPress = (spot: Spot) => {
-    Alert.alert(spot.name, '操作を選択', [
-      { text: '編集', onPress: () => console.log('Edit', spot.id) },
-      { text: '削除', style: 'destructive', onPress: () => console.log('Delete', spot.id) },
-      { text: 'キャンセル', style: 'cancel' },
-    ]);
+    confirmDelete(spot, spot.name);
   };
 
   const handleAddSpot = () => {
@@ -136,27 +97,34 @@ export function ScheduleScreen() {
         </ScrollView>
       </View>
 
-      <FlatList
-        data={spots}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item, index }) => (
-          <SpotCard
-            spot={item}
-            index={index}
-            onPress={() => handleSpotPress(item)}
-            onLongPress={() => handleSpotLongPress(item)}
-          />
-        )}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={() => (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>📍</Text>
-            <Text style={styles.emptyText}>
-              スポットがありません{'\n'}+ ボタンから追加しましょう
-            </Text>
-          </View>
-        )}
-      />
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.accent} />
+        </View>
+      ) : (
+        <FlatList
+          data={spots}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item, index }) => (
+            <SpotCard
+              spot={item}
+              index={index}
+              onPress={() => handleSpotPress(item)}
+              onLongPress={() => handleSpotLongPress(item)}
+            />
+          )}
+          contentContainerStyle={styles.listContent}
+          ListHeaderComponent={
+            spots.length > 0 ? <Text style={styles.hintText}>長押しで削除できます</Text> : null
+          }
+          ListEmptyComponent={() => (
+            <EmptyState
+              icon="location-outline"
+              message={`スポットがありません\n+ ボタンから追加しましょう`}
+            />
+          )}
+        />
+      )}
 
       <FAB onPress={handleAddSpot} />
     </View>
@@ -182,7 +150,7 @@ const styles = StyleSheet.create({
   dayTab: {
     paddingHorizontal: spacing.xl,
     paddingVertical: 10,
-    borderRadius: 20,
+    borderRadius: radius['3xl'],
     backgroundColor: colors.background.elevated,
   },
   dayTabActive: {
@@ -194,26 +162,21 @@ const styles = StyleSheet.create({
     color: colors.text.tertiary,
   },
   dayTabTextActive: {
-    color: '#fff',
+    color: colors.white,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  hintText: {
+    fontSize: typography.fontSizes.sm,
+    color: colors.text.quaternary,
+    textAlign: 'center',
+    paddingVertical: spacing.md,
   },
   listContent: {
     paddingVertical: spacing.base,
     paddingBottom: 100,
-  },
-  emptyContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 80,
-  },
-  emptyIcon: {
-    fontSize: 48,
-    marginBottom: spacing.base,
-  },
-  emptyText: {
-    fontSize: typography.fontSizes.lg,
-    color: colors.text.tertiary,
-    textAlign: 'center',
-    lineHeight: 22,
   },
 });

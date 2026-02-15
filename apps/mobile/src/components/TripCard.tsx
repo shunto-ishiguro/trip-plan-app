@@ -1,6 +1,7 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { colors, radius, shadows, spacing, typography } from '../theme';
 import type { Trip } from '../types';
+import { formatDateShort } from '../utils/date';
 
 interface TripCardProps {
   trip: Trip;
@@ -8,13 +9,8 @@ interface TripCardProps {
 }
 
 export function TripCard({ trip, onPress }: TripCardProps) {
-  const formatDateRange = (start: string, end: string) => {
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    const startStr = `${startDate.getMonth() + 1}/${startDate.getDate()}`;
-    const endStr = `${endDate.getMonth() + 1}/${endDate.getDate()}`;
-    return `${startStr} - ${endStr}`;
-  };
+  const formatDateRange = (start: string, end: string) =>
+    `${formatDateShort(start)} - ${formatDateShort(end)}`;
 
   const getDaysCount = (start: string, end: string) => {
     const startDate = new Date(start);

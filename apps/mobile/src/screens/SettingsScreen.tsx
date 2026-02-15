@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth } from '../contexts/AuthContext';
 import { colors, radius, spacing, typography } from '../theme';
 
 type Theme = 'light' | 'dark' | 'system';
 
 export function SettingsScreen() {
+  const { user, logout } = useAuth();
   const [theme, setTheme] = useState<Theme>('system');
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [reminderEnabled, setReminderEnabled] = useState(true);
@@ -28,7 +30,7 @@ export function SettingsScreen() {
   const handleLogout = () => {
     Alert.alert('ログアウト', 'ログアウトしますか？', [
       { text: 'キャンセル', style: 'cancel' },
-      { text: 'ログアウト', style: 'destructive', onPress: () => console.log('Logout') },
+      { text: 'ログアウト', style: 'destructive', onPress: () => logout() },
     ]);
   };
 
@@ -46,7 +48,7 @@ export function SettingsScreen() {
             <View style={styles.rowDivider} />
             <TouchableOpacity style={styles.row}>
               <Text style={styles.rowLabel}>メールアドレス</Text>
-              <Text style={styles.rowValue}>user@example.com</Text>
+              <Text style={styles.rowValue}>{user?.email ?? ''}</Text>
             </TouchableOpacity>
             <View style={styles.rowDivider} />
             <TouchableOpacity style={styles.row}>
@@ -193,7 +195,7 @@ const styles = StyleSheet.create({
   },
   appInfo: {
     alignItems: 'center',
-    paddingVertical: 32,
+    paddingVertical: spacing['4xl'],
   },
   appName: {
     fontSize: typography.fontSizes.xl,

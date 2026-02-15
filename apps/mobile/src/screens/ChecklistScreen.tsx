@@ -1,27 +1,20 @@
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { useState } from 'react';
-import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { ChecklistItemRow, FAB } from '../components';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import * as checklistApi from '../api/checklistItems';
+import { ChecklistItemRow, EmptyState, FAB } from '../components';
+import { useDeleteConfirmation } from '../hooks/useDeleteConfirmation';
 import type { TripTabScreenProps } from '../navigation/types';
 import { colors, spacing, typography } from '../theme';
 import type { ChecklistItem } from '../types';
-
-// モックデータ
-const MOCK_PACKING_ITEMS: ChecklistItem[] = [
-  { id: '1', tripId: '1', type: 'packing', text: 'パスポート', checked: true },
-  { id: '2', tripId: '1', type: 'packing', text: '財布・現金', checked: true },
-  { id: '3', tripId: '1', type: 'packing', text: 'スマホ・充電器', checked: false },
-  { id: '4', tripId: '1', type: 'packing', text: '着替え（3日分）', checked: false },
-  { id: '5', tripId: '1', type: 'packing', text: '洗面用具', checked: false },
-  { id: '6', tripId: '1', type: 'packing', text: 'カメラ', checked: false },
-];
-
-const MOCK_TODO_ITEMS: ChecklistItem[] = [
-  { id: '7', tripId: '1', type: 'todo', text: '新幹線のチケット予約', checked: true },
-  { id: '8', tripId: '1', type: 'todo', text: 'ホテルの予約確認', checked: true },
-  { id: '9', tripId: '1', type: 'todo', text: '郵便物の転送手続き', checked: false },
-  { id: '10', tripId: '1', type: 'todo', text: '植物の水やり依頼', checked: false },
-];
 
 type Props = TripTabScreenProps<'Checklist'>;
 type TabType = 'packing' | 'todo';
@@ -32,8 +25,27 @@ export function ChecklistScreen() {
   const { tripId } = route.params;
 
   const [selectedTab, setSelectedTab] = useState<TabType>('packing');
-  const [packingItems, setPackingItems] = useState(MOCK_PACKING_ITEMS);
-  const [todoItems, setTodoItems] = useState(MOCK_TODO_ITEMS);
+  const [packingItems, setPackingItems] = useState<ChecklistItem[]>([]);
+  const [todoItems, setTodoItems] = useState<ChecklistItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchItems = useCallback(async () => {
+    try {
+      const data = await checklistApi.getChecklistItems(tripId);
+      setPackingItems(data.filter((i) => i.type === 'packing'));
+      setTodoItems(data.filter((i) => i.type === 'todo'));
+    } catch {
+      // silently fail
+    } finally {
+      setLoading(false);
+    }
+  }, [tripId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchItems();
+    }, [fetchItems]),
+  );
 
   const items = selectedTab === 'packing' ? packingItems : todoItems;
   const setItems = selectedTab === 'packing' ? setPackingItems : setTodoItems;
@@ -42,33 +54,49 @@ export function ChecklistScreen() {
   const totalCount = items.length;
   const progress = totalCount > 0 ? (checkedCount / totalCount) * 100 : 0;
 
-  const handleToggle = (id: string) => {
-    setItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, checked: !item.checked } : item)),
+  const handleToggle = async (id: string) => {
+    const prev = items;
+    setItems((current) =>
+      current.map((item) => (item.id === id ? { ...item, checked: !item.checked } : item)),
     );
+    try {
+      await checklistApi.toggleChecklistItem(tripId, id);
+    } catch {
+      setItems(prev);
+      Alert.alert('エラー', '更新に失敗しました');
+    }
   };
 
-  const handleItemPress = (item: ChecklistItem) => {
-    Alert.alert(item.text, '操作を選択', [
-      { text: '編集', onPress: () => console.log('Edit', item.id) },
-      { text: '削除', style: 'destructive', onPress: () => console.log('Delete', item.id) },
-      { text: 'キャンセル', style: 'cancel' },
-    ]);
+  const { confirmDelete } = useDeleteConfirmation<ChecklistItem>(
+    (id) => checklistApi.deleteChecklistItem(tripId, id),
+    setItems,
+  );
+
+  const handleLongPress = (item: ChecklistItem) => {
+    confirmDelete(item, item.text);
   };
 
   const handleAddItem = () => {
     navigation.navigate('AddChecklistItem', { tripId, type: selectedTab });
   };
 
-  // 完了したアイテムを下に並べる
   const sortedItems = [...items].sort((a, b) => {
     if (a.checked === b.checked) return 0;
     return a.checked ? 1 : -1;
   });
 
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.accent} />
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      {/* タブ */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
           style={[styles.tab, selectedTab === 'packing' && styles.tabActive]}
@@ -88,7 +116,6 @@ export function ChecklistScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* 進捗表示 */}
       <View style={styles.progressContainer}>
         <View style={styles.progressHeader}>
           <Text style={styles.progressText}>
@@ -101,7 +128,8 @@ export function ChecklistScreen() {
         </View>
       </View>
 
-      {/* リスト */}
+      {items.length > 0 && <Text style={styles.hintText}>長押しで削除できます</Text>}
+
       <FlatList
         data={sortedItems}
         keyExtractor={(item) => item.id}
@@ -109,18 +137,15 @@ export function ChecklistScreen() {
           <ChecklistItemRow
             item={item}
             onToggle={() => handleToggle(item.id)}
-            onPress={() => handleItemPress(item)}
+            onLongPress={() => handleLongPress(item)}
           />
         )}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={() => (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>{selectedTab === 'packing' ? '🎒' : '📝'}</Text>
-            <Text style={styles.emptyText}>
-              {selectedTab === 'packing' ? '持ち物' : 'やること'}がありません{'\n'}+
-              ボタンから追加しましょう
-            </Text>
-          </View>
+          <EmptyState
+            icon={selectedTab === 'packing' ? 'bag-outline' : 'document-text-outline'}
+            message={`${selectedTab === 'packing' ? '持ち物' : 'やること'}がありません\n+ ボタンから追加しましょう`}
+          />
         )}
       />
 
@@ -133,6 +158,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.primary,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   tabContainer: {
     flexDirection: 'row',
@@ -190,21 +220,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent,
     borderRadius: 4,
   },
+  hintText: {
+    fontSize: typography.fontSizes.sm,
+    color: colors.text.quaternary,
+    textAlign: 'center',
+    paddingVertical: spacing.md,
+  },
   listContent: {
     paddingBottom: 100,
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    paddingTop: 60,
-  },
-  emptyIcon: {
-    fontSize: 48,
-    marginBottom: spacing.base,
-  },
-  emptyText: {
-    fontSize: typography.fontSizes.lg,
-    color: colors.text.tertiary,
-    textAlign: 'center',
-    lineHeight: 22,
   },
 });
