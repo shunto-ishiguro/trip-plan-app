@@ -8,13 +8,11 @@
     "build": "bun build src/index.ts --outdir dist --target bun",
     "start": "bun run --env-file ../../.env dist/index.js",
     "typecheck": "tsc --noEmit",
-    "db:generate": "bun run --env-file ../../.env drizzle-kit generate",
-    "db:migrate": "bun run --env-file ../../.env drizzle-kit migrate",
-    "db:push": "bun run --env-file ../../.env drizzle-kit push",
-    "db:studio": "bun run --env-file ../../.env drizzle-kit studio"
+    "db:pull": "bun run --env-file ../../.env drizzle-kit pull"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.2.0",
+    "@sinclair/typebox": "^0.34.48",
     "drizzle-orm": "^0.45.1",
     "elysia": "^1.2.25",
     "postgres": "^3.4.8"
