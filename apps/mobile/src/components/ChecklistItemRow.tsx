@@ -1,28 +1,31 @@
+import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { colors, radius, spacing, typography } from '../theme';
 import type { ChecklistItem } from '../types';
 
 interface ChecklistItemRowProps {
   item: ChecklistItem;
   onToggle: () => void;
-  onPress: () => void;
+  onLongPress: () => void;
 }
 
-export function ChecklistItemRow({ item, onToggle, onPress }: ChecklistItemRowProps) {
-  const handleToggle = () => {
+export function ChecklistItemRow({ item, onToggle, onLongPress }: ChecklistItemRowProps) {
+  const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onToggle();
   };
 
   return (
-    <TouchableOpacity style={styles.row} onPress={onPress} activeOpacity={0.7}>
-      <TouchableOpacity
-        style={[styles.checkbox, item.checked && styles.checkboxChecked]}
-        onPress={handleToggle}
-      >
-        {item.checked && <Text style={styles.checkmark}>✓</Text>}
-      </TouchableOpacity>
+    <TouchableOpacity
+      style={styles.row}
+      onPress={handlePress}
+      onLongPress={onLongPress}
+      activeOpacity={0.7}
+    >
+      <View style={[styles.checkbox, item.checked && styles.checkboxChecked]}>
+        {item.checked && <Ionicons name="checkmark" size={16} color={colors.white} />}
+      </View>
       <Text style={[styles.text, item.checked && styles.textChecked]} numberOfLines={2}>
         {item.text}
       </Text>
@@ -53,11 +56,6 @@ const styles = StyleSheet.create({
   checkboxChecked: {
     backgroundColor: colors.accent,
     borderColor: colors.accent,
-  },
-  checkmark: {
-    color: '#fff',
-    fontSize: typography.fontSizes.base,
-    fontWeight: typography.fontWeights.semibold,
   },
   text: {
     flex: 1,

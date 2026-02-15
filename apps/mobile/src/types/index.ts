@@ -60,7 +60,28 @@ export interface Reservation {
 
 // 共有設定
 export interface ShareSettings {
+  id: string;
   tripId: string;
-  shareUrl: string;
+  shareUrl: string | null;
   permission: 'view' | 'edit';
+  shareToken: string;
+  isActive: boolean;
+  createdBy: string | null;
+}
+
+// 旅行プレビュー（合言葉で取得）
+export interface TripPreview {
+  tripId: string;
+  title: string;
+  destination: string;
+  startDate: string;
+  endDate: string;
+  permission: 'view' | 'edit';
+}
+
+// 旅行参加結果
+export interface JoinResult {
+  message: string;
+  tripId: string;
+  role?: string;
 }

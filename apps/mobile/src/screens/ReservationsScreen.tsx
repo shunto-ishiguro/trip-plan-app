@@ -1,59 +1,14 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { useState } from 'react';
-import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
-import { FAB, ReservationCard } from '../components';
+import type React from 'react';
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import * as reservationsApi from '../api/reservations';
+import { EmptyState, FAB, ReservationCard } from '../components';
+import { useDeleteConfirmation } from '../hooks/useDeleteConfirmation';
+import { useFocusData } from '../hooks/useFocusData';
 import type { TripTabScreenProps } from '../navigation/types';
 import { colors, spacing, typography } from '../theme';
 import type { Reservation } from '../types';
-
-// モックデータ
-const MOCK_RESERVATIONS: Reservation[] = [
-  {
-    id: '1',
-    tripId: '1',
-    type: 'flight',
-    name: 'ANA 123便 羽田→伊丹',
-    confirmationNumber: 'ABC123DEF',
-    datetime: '2026-03-15T08:00:00',
-    memo: '第2ターミナル',
-  },
-  {
-    id: '2',
-    tripId: '1',
-    type: 'hotel',
-    name: '京都グランドホテル',
-    confirmationNumber: 'KGH-2026-0315',
-    datetime: '2026-03-15T15:00:00',
-    memo: 'チェックイン15時〜',
-    link: 'https://example.com/hotel',
-  },
-  {
-    id: '3',
-    tripId: '1',
-    type: 'restaurant',
-    name: '祇園 懐石料理 さくら',
-    confirmationNumber: '0315-1900',
-    datetime: '2026-03-15T19:00:00',
-    memo: '2名様 カウンター席',
-  },
-  {
-    id: '4',
-    tripId: '1',
-    type: 'activity',
-    name: '着物レンタル きもの館',
-    confirmationNumber: 'KM-20260316',
-    datetime: '2026-03-16T09:00:00',
-  },
-  {
-    id: '5',
-    tripId: '1',
-    type: 'flight',
-    name: 'ANA 456便 伊丹→羽田',
-    confirmationNumber: 'XYZ789GHI',
-    datetime: '2026-03-17T18:00:00',
-  },
-];
+import { formatDateShort } from '../utils/date';
 
 type Props = TripTabScreenProps<'Reservations'>;
 
@@ -62,10 +17,24 @@ export function ReservationsScreen() {
   const route = useRoute<Props['route']>();
   const { tripId } = route.params;
 
-  const [reservations] = useState<Reservation[]>(MOCK_RESERVATIONS);
+  const {
+    data: reservations,
+    loading,
+    setData: setReservations,
+  } = useFocusData(() => reservationsApi.getReservations(tripId), [tripId]);
 
-  // 日付でグループ化
-  const groupedReservations = reservations.reduce(
+  const items = reservations ?? [];
+
+  const { confirmDelete } = useDeleteConfirmation<Reservation>(
+    (id) => reservationsApi.deleteReservation(tripId, id),
+    ((updater: React.SetStateAction<Reservation[]>) =>
+      setReservations((prev) => {
+        const current = prev ?? [];
+        return typeof updater === 'function' ? updater(current) : updater;
+      })) as React.Dispatch<React.SetStateAction<Reservation[]>>,
+  );
+
+  const groupedReservations = items.reduce(
     (acc, reservation) => {
       if (!reservation.datetime) {
         const key = 'その他';
@@ -74,8 +43,7 @@ export function ReservationsScreen() {
         return acc;
       }
 
-      const date = new Date(reservation.datetime);
-      const key = `${date.getMonth() + 1}/${date.getDate()}`;
+      const key = formatDateShort(reservation.datetime);
       if (!acc[key]) acc[key] = [];
       acc[key].push(reservation);
       return acc;
@@ -83,7 +51,6 @@ export function ReservationsScreen() {
     {} as Record<string, Reservation[]>,
   );
 
-  // 日付順にソート
   const sortedGroups = Object.entries(groupedReservations).sort((a, b) => {
     if (a[0] === 'その他') return 1;
     if (b[0] === 'その他') return -1;
@@ -91,18 +58,10 @@ export function ReservationsScreen() {
   });
 
   const handleReservationPress = (reservation: Reservation) => {
-    Alert.alert(
+    confirmDelete(
+      reservation,
       reservation.name,
       `予約番号: ${reservation.confirmationNumber || 'なし'}\n${reservation.memo || ''}`,
-      [
-        { text: '編集', onPress: () => console.log('Edit', reservation.id) },
-        {
-          text: '削除',
-          style: 'destructive',
-          onPress: () => console.log('Delete', reservation.id),
-        },
-        { text: '閉じる', style: 'cancel' },
-      ],
     );
   };
 
@@ -116,8 +75,20 @@ export function ReservationsScreen() {
     </View>
   );
 
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.accent} />
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
+      {items.length > 0 && <Text style={styles.hintText}>タップで詳細・削除</Text>}
+
       <FlatList
         data={sortedGroups}
         keyExtractor={([date]) => date}
@@ -141,12 +112,10 @@ export function ReservationsScreen() {
         )}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={() => (
-          <View style={styles.emptyContainer}>
-            <Ionicons name="document-text-outline" size={48} color={colors.text.quaternary} />
-            <Text style={styles.emptyText}>
-              予約情報がありません{'\n'}+ ボタンから追加しましょう
-            </Text>
-          </View>
+          <EmptyState
+            icon="document-text-outline"
+            message={`予約情報がありません\n+ ボタンから追加しましょう`}
+          />
         )}
       />
 
@@ -159,6 +128,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.primary,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  hintText: {
+    fontSize: typography.fontSizes.sm,
+    color: colors.text.quaternary,
+    textAlign: 'center',
+    paddingVertical: spacing.md,
   },
   listContent: {
     paddingBottom: 100,
@@ -173,16 +153,5 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSizes.base,
     fontWeight: typography.fontWeights.semibold,
     color: colors.text.secondary,
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    paddingTop: 80,
-  },
-  emptyText: {
-    marginTop: spacing.base,
-    fontSize: typography.fontSizes.lg,
-    color: colors.text.tertiary,
-    textAlign: 'center',
-    lineHeight: 22,
   },
 });

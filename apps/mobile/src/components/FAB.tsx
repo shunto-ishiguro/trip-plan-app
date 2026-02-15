@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
-import { gradients, shadows } from '../theme';
+import { colors, gradients, shadows } from '../theme';
 
 interface FABProps {
   onPress: () => void;
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
   },
   icon: {
     fontSize: 28,
-    color: '#fff',
+    color: colors.white,
     fontWeight: '300',
   },
 });

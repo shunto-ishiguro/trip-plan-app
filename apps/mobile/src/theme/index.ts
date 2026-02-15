@@ -4,19 +4,21 @@
 export const gradients = {
   primary: ['#8BC34A', '#689F38', '#558B2F'] as const,
   accent: ['#8BC34A', '#689F38'] as const,
-  // Category gradients (2-color, horizontal)
-  transport: ['#60A5FA', '#3B82F6'] as const, // blue
-  accommodation: ['#F472B6', '#EC4899'] as const, // pink
-  food: ['#FBBF24', '#F59E0B'] as const, // yellow
-  activity: ['#22D3EE', '#06B6D4'] as const, // light blue
-  other: ['#BDBDBD', '#9E9E9E'] as const, // grey
-  // Reservation type gradients
-  flight: ['#60A5FA', '#3B82F6'] as const, // blue
-  hotel: ['#F472B6', '#EC4899'] as const, // pink
-  rental_car: ['#34D399', '#10B981'] as const, // green
-  restaurant: ['#FBBF24', '#F59E0B'] as const, // yellow
-  activityReservation: ['#22D3EE', '#06B6D4'] as const, // light blue
-  otherReservation: ['#BDBDBD', '#9E9E9E'] as const, // grey
+  category: {
+    transport: ['#60A5FA', '#3B82F6'] as const, // blue
+    accommodation: ['#F472B6', '#EC4899'] as const, // pink
+    food: ['#FBBF24', '#F59E0B'] as const, // yellow
+    activity: ['#22D3EE', '#06B6D4'] as const, // light blue
+    other: ['#BDBDBD', '#9E9E9E'] as const, // grey
+  },
+  reservation: {
+    flight: ['#60A5FA', '#3B82F6'] as const, // blue
+    hotel: ['#F472B6', '#EC4899'] as const, // pink
+    rental_car: ['#34D399', '#10B981'] as const, // green
+    restaurant: ['#FBBF24', '#F59E0B'] as const, // yellow
+    activity: ['#22D3EE', '#06B6D4'] as const, // light blue
+    other: ['#BDBDBD', '#9E9E9E'] as const, // grey
+  },
 } as const;
 
 export const colors = {
@@ -58,6 +60,9 @@ export const colors = {
   accent: '#7CB342',
   accentLight: '#F1F8E9',
   white: '#FFFFFF',
+  overlay: 'rgba(0, 0, 0, 0.5)',
+  whiteAlpha80: 'rgba(255, 255, 255, 0.8)',
+  whiteAlpha30: 'rgba(255, 255, 255, 0.3)',
 } as const;
 
 export const typography = {
@@ -88,6 +93,9 @@ export const spacing = {
   lg: 16,
   xl: 20,
   '2xl': 24,
+  '3xl': 28,
+  '4xl': 32,
+  '5xl': 40,
 } as const;
 
 export const radius = {
@@ -96,6 +104,7 @@ export const radius = {
   lg: 10,
   xl: 12,
   '2xl': 16,
+  '3xl': 20,
   full: 9999,
 } as const;
 

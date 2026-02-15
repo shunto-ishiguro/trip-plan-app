@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { colors, gradients, radius, shadows, spacing, typography } from '../theme';
 import type { Reservation } from '../types';
+import { formatDatetime } from '../utils/date';
 
 type IoniconsName = keyof typeof Ionicons.glyphMap;
 
@@ -31,15 +32,6 @@ const TYPE_ICONS: Record<Reservation['type'], IoniconsName> = {
   other: 'document-text-outline',
 };
 
-const TYPE_GRADIENT_KEYS: Record<Reservation['type'], keyof typeof gradients> = {
-  flight: 'flight',
-  hotel: 'hotel',
-  rental_car: 'rental_car',
-  restaurant: 'restaurant',
-  activity: 'activityReservation',
-  other: 'otherReservation',
-};
-
 export function ReservationCard({ reservation, onPress }: ReservationCardProps) {
   const handleCopyConfirmation = async () => {
     if (reservation.confirmationNumber) {
@@ -48,13 +40,7 @@ export function ReservationCard({ reservation, onPress }: ReservationCardProps) 
     }
   };
 
-  const formatDatetime = (datetime?: string) => {
-    if (!datetime) return '';
-    const date = new Date(datetime);
-    return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
-  };
-
-  const badgeGradient = gradients[TYPE_GRADIENT_KEYS[reservation.type]];
+  const badgeGradient = gradients.reservation[reservation.type];
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
@@ -68,7 +54,7 @@ export function ReservationCard({ reservation, onPress }: ReservationCardProps) 
           <Ionicons
             name={TYPE_ICONS[reservation.type]}
             size={14}
-            color="#fff"
+            color={colors.white}
             style={styles.typeIcon}
           />
           <Text style={styles.typeText}>{TYPE_LABELS[reservation.type]}</Text>
@@ -126,7 +112,7 @@ const styles = StyleSheet.create({
   },
   typeText: {
     fontSize: typography.fontSizes.sm,
-    color: '#fff',
+    color: colors.white,
     fontWeight: typography.fontWeights.medium,
   },
   datetime: {

@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useState } from 'react';
 import {
@@ -8,15 +9,16 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { GradientButton } from '../components';
+import * as reservationsApi from '../api/reservations';
+import { FormInput, GradientButton } from '../components';
 import type { RootStackScreenProps } from '../navigation/types';
 import { colors, radius, spacing, typography } from '../theme';
 import type { Reservation } from '../types';
+import { formatDateISO, formatTime } from '../utils/date';
 
 type Props = RootStackScreenProps<'AddReservation'>;
 
@@ -62,31 +64,41 @@ export function AddReservationScreen() {
   const [type, setType] = useState<Reservation['type']>('hotel');
   const [name, setName] = useState('');
   const [confirmationNumber, setConfirmationNumber] = useState('');
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
+  const [date, setDate] = useState<Date | null>(null);
+  const [time, setTime] = useState<Date | null>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
   const [link, setLink] = useState('');
   const [memo, setMemo] = useState('');
+  const [saving, setSaving] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!name.trim()) {
       Alert.alert('エラー', '予約名を入力してください');
       return;
     }
 
-    const datetime = date && time ? `${date}T${time}:00` : date ? `${date}T00:00:00` : undefined;
+    const dateStr = date ? formatDateISO(date) : '';
+    const timeStr = time ? formatTime(time) : '';
+    const datetime =
+      dateStr && timeStr ? `${dateStr}T${timeStr}:00` : dateStr ? `${dateStr}T00:00:00` : undefined;
 
-    // TODO: API呼び出し
-    console.log({
-      tripId,
-      type,
-      name,
-      confirmationNumber: confirmationNumber || undefined,
-      datetime,
-      link: link || undefined,
-      memo: memo || undefined,
-    });
-
-    navigation.goBack();
+    setSaving(true);
+    try {
+      await reservationsApi.createReservation(tripId, {
+        type,
+        name,
+        confirmationNumber: confirmationNumber || null,
+        datetime: datetime || null,
+        link: link || null,
+        memo: memo || null,
+      });
+      navigation.goBack();
+    } catch {
+      Alert.alert('エラー', '保存に失敗しました');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const selectedType = RESERVATION_TYPES.find((t) => t.value === type);
@@ -118,7 +130,7 @@ export function AddReservationScreen() {
                   onPress={() => setType(item.value)}
                 >
                   <View style={[styles.typeIcon, { backgroundColor: item.color }]}>
-                    <Ionicons name={item.icon} size={20} color="#fff" />
+                    <Ionicons name={item.icon} size={20} color={colors.white} />
                   </View>
                   <Text style={[styles.typeLabel, type === item.value && { color: item.color }]}>
                     {item.label}
@@ -128,82 +140,85 @@ export function AddReservationScreen() {
             </View>
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.label}>予約名 *</Text>
-            <TextInput
-              style={styles.input}
-              value={name}
-              onChangeText={setName}
-              placeholder={`例: ${selectedType?.label || '予約'}の名前`}
-              placeholderTextColor={colors.text.quaternary}
-            />
-          </View>
+          <FormInput
+            label="予約名 *"
+            value={name}
+            onChangeText={setName}
+            placeholder={`例: ${selectedType?.label || '予約'}の名前`}
+          />
 
-          <View style={styles.section}>
-            <Text style={styles.label}>予約番号・確認番号</Text>
-            <TextInput
-              style={styles.input}
-              value={confirmationNumber}
-              onChangeText={setConfirmationNumber}
-              placeholder="例: ABC123XYZ"
-              placeholderTextColor={colors.text.quaternary}
-              autoCapitalize="characters"
-            />
-          </View>
+          <FormInput
+            label="予約番号・確認番号"
+            value={confirmationNumber}
+            onChangeText={setConfirmationNumber}
+            placeholder="例: ABC123XYZ"
+            autoCapitalize="characters"
+          />
 
           <View style={styles.row}>
             <View style={[styles.section, styles.flex2]}>
               <Text style={styles.label}>日付</Text>
-              <TextInput
-                style={styles.input}
-                value={date}
-                onChangeText={setDate}
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor={colors.text.quaternary}
-              />
+              <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
+                <Text style={date ? styles.inputText : styles.placeholderText}>
+                  {date ? formatDateISO(date) : 'YYYY-MM-DD'}
+                </Text>
+              </TouchableOpacity>
+              {showDatePicker && (
+                <DateTimePicker
+                  value={date ?? new Date()}
+                  mode="date"
+                  onChange={(_, selected) => {
+                    setShowDatePicker(Platform.OS === 'ios');
+                    if (selected) setDate(selected);
+                  }}
+                />
+              )}
             </View>
             <View style={[styles.section, styles.flex1]}>
               <Text style={styles.label}>時間</Text>
-              <TextInput
-                style={styles.input}
-                value={time}
-                onChangeText={setTime}
-                placeholder="HH:MM"
-                placeholderTextColor={colors.text.quaternary}
-              />
+              <TouchableOpacity style={styles.input} onPress={() => setShowTimePicker(true)}>
+                <Text style={time ? styles.inputText : styles.placeholderText}>
+                  {time ? formatTime(time) : 'HH:MM'}
+                </Text>
+              </TouchableOpacity>
+              {showTimePicker && (
+                <DateTimePicker
+                  value={time ?? new Date()}
+                  mode="time"
+                  onChange={(_, selected) => {
+                    setShowTimePicker(Platform.OS === 'ios');
+                    if (selected) setTime(selected);
+                  }}
+                />
+              )}
             </View>
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.label}>リンク</Text>
-            <TextInput
-              style={styles.input}
-              value={link}
-              onChangeText={setLink}
-              placeholder="https://..."
-              placeholderTextColor={colors.text.quaternary}
-              keyboardType="url"
-              autoCapitalize="none"
-            />
-          </View>
+          <FormInput
+            label="リンク"
+            value={link}
+            onChangeText={setLink}
+            placeholder="https://..."
+            keyboardType="url"
+            autoCapitalize="none"
+          />
 
-          <View style={styles.section}>
-            <Text style={styles.label}>メモ</Text>
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              value={memo}
-              onChangeText={setMemo}
-              placeholder="予約に関するメモ..."
-              placeholderTextColor={colors.text.quaternary}
-              multiline
-              numberOfLines={3}
-              textAlignVertical="top"
-            />
-          </View>
+          <FormInput
+            label="メモ"
+            value={memo}
+            onChangeText={setMemo}
+            placeholder="予約に関するメモ..."
+            multiline
+            numberOfLines={3}
+          />
         </ScrollView>
 
         <View style={styles.footer}>
-          <GradientButton onPress={handleSave} label="追加する" />
+          <GradientButton
+            onPress={handleSave}
+            label={saving ? '保存中...' : '追加する'}
+            disabled={saving}
+          />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -223,7 +238,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing.xl,
-    paddingBottom: 40,
+    paddingBottom: spacing['5xl'],
   },
   section: {
     marginBottom: spacing.xl,
@@ -282,9 +297,13 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSizes.xl,
     color: colors.text.primary,
   },
-  textArea: {
-    minHeight: 80,
-    paddingTop: 12,
+  inputText: {
+    fontSize: typography.fontSizes.xl,
+    color: colors.text.primary,
+  },
+  placeholderText: {
+    fontSize: typography.fontSizes.xl,
+    color: colors.text.quaternary,
   },
   footer: {
     padding: spacing.xl,

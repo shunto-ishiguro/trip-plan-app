@@ -22,7 +22,7 @@ export function BudgetItemCard({ item, memberCount, onPress }: BudgetItemCardPro
     return `¥${amount.toLocaleString()}`;
   };
 
-  const badgeGradient = gradients[item.category];
+  const badgeGradient = gradients.category[item.category];
   const isPerPerson = item.pricingType === 'per_person';
 
   return (
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     marginRight: spacing.base,
   },
   categoryText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: typography.fontSizes.sm,
     fontWeight: typography.fontWeights.medium,
   },

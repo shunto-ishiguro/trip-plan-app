@@ -1,66 +1,58 @@
-import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useState } from 'react';
-import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as tripsApi from '../api/trips';
 import { FAB, TripCard } from '../components';
 import type { RootStackParamList } from '../navigation/types';
 import { colors, spacing, typography } from '../theme';
 import type { Trip } from '../types';
 
-// モックデータ
-const MOCK_TRIPS: Trip[] = [
-  {
-    id: '1',
-    title: '京都旅行',
-    destination: '京都府',
-    startDate: '2026-03-15',
-    endDate: '2026-03-17',
-    memberCount: 2,
-    memo: '桜の時期に合わせて',
-    createdAt: '2026-01-15T10:00:00Z',
-    updatedAt: '2026-01-15T10:00:00Z',
-  },
-  {
-    id: '2',
-    title: '沖縄家族旅行',
-    destination: '沖縄県',
-    startDate: '2026-07-20',
-    endDate: '2026-07-24',
-    memberCount: 4,
-    createdAt: '2026-01-20T10:00:00Z',
-    updatedAt: '2026-01-20T10:00:00Z',
-  },
-  {
-    id: '3',
-    title: '北海道グルメ旅',
-    destination: '北海道',
-    startDate: '2026-09-01',
-    endDate: '2026-09-04',
-    memberCount: 3,
-    memo: '海鮮とラーメンを堪能',
-    createdAt: '2026-01-25T10:00:00Z',
-    updatedAt: '2026-01-25T10:00:00Z',
-  },
-];
-
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export function TripListScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const [trips] = useState<Trip[]>(MOCK_TRIPS);
+  const [trips, setTrips] = useState<Trip[]>([]);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const handleRefresh = async () => {
+  const fetchTrips = useCallback(async () => {
+    try {
+      const data = await tripsApi.getTrips();
+      setTrips(data);
+    } catch {
+      // silently fail — empty list shown
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchTrips();
+    }, [fetchTrips]),
+  );
+
+  const handleRefresh = () => {
     setRefreshing(true);
-    // TODO: API呼び出し
-    await new Promise<void>((resolve) => setTimeout(() => resolve(), 1000));
-    setRefreshing(false);
+    fetchTrips();
   };
 
   const handleTripPress = (trip: Trip) => {
     navigation.navigate('TripDetail', {
       tripId: trip.id,
+      tripTitle: trip.title,
       screen: 'Schedule',
       params: { tripId: trip.id },
     });
@@ -70,18 +62,48 @@ export function TripListScreen() {
     navigation.navigate('TripCreate');
   };
 
+  const handleJoinTrip = () => {
+    navigation.navigate('JoinTrip');
+  };
+
   const renderEmptyList = () => (
     <View style={styles.emptyContainer}>
-      <Text style={styles.emptyIcon}>🗺️</Text>
+      <Ionicons
+        name="map-outline"
+        size={48}
+        color={colors.text.tertiary}
+        style={styles.emptyIcon}
+      />
       <Text style={styles.emptyTitle}>旅行がありません</Text>
       <Text style={styles.emptyText}>右下の + ボタンから{'\n'}新しい旅行を作成しましょう</Text>
     </View>
   );
 
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>旅行一覧</Text>
+          <TouchableOpacity style={styles.joinButton} onPress={handleJoinTrip}>
+            <Ionicons name="enter-outline" size={18} color={colors.accent} />
+            <Text style={styles.joinButtonText}>参加する</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.accent} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>旅行一覧</Text>
+        <TouchableOpacity style={styles.joinButton} onPress={handleJoinTrip}>
+          <Ionicons name="enter-outline" size={18} color={colors.accent} />
+          <Text style={styles.joinButtonText}>参加する</Text>
+        </TouchableOpacity>
       </View>
       <FlatList
         data={trips}
@@ -104,6 +126,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.primary,
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: spacing.xl,
     paddingVertical: spacing.lg,
     backgroundColor: colors.background.card,
@@ -114,6 +139,23 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSizes['5xl'],
     fontWeight: typography.fontWeights.bold,
     color: colors.text.primary,
+  },
+  joinButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.base,
+  },
+  joinButtonText: {
+    fontSize: typography.fontSizes.base,
+    fontWeight: typography.fontWeights.medium,
+    color: colors.accent,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   listContainer: {
     paddingVertical: spacing.md,
@@ -129,7 +171,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   emptyIcon: {
-    fontSize: 64,
     marginBottom: spacing.lg,
   },
   emptyTitle: {

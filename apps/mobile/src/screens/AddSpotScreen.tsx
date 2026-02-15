@@ -1,3 +1,4 @@
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
@@ -8,13 +9,15 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { GradientButton } from '../components';
+import * as spotsApi from '../api/spots';
+import { FormInput, GradientButton } from '../components';
 import type { RootStackScreenProps } from '../navigation/types';
 import { colors, gradients, radius, spacing, typography } from '../theme';
+import { formatTime } from '../utils/date';
 
 type Props = RootStackScreenProps<'AddSpot'>;
 
@@ -25,28 +28,36 @@ export function AddSpotScreen() {
 
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
+  const [startTime, setStartTime] = useState<Date | null>(null);
+  const [endTime, setEndTime] = useState<Date | null>(null);
+  const [showStartTimePicker, setShowStartTimePicker] = useState(false);
+  const [showEndTimePicker, setShowEndTimePicker] = useState(false);
   const [memo, setMemo] = useState('');
+  const [saving, setSaving] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!name.trim()) {
       Alert.alert('エラー', 'スポット名を入力してください');
       return;
     }
 
-    // TODO: API呼び出し
-    console.log({
-      tripId,
-      dayIndex,
-      name,
-      address,
-      startTime,
-      endTime,
-      memo,
-    });
-
-    navigation.goBack();
+    setSaving(true);
+    try {
+      await spotsApi.createSpot(tripId, {
+        dayIndex,
+        order: 0,
+        name,
+        address: address || null,
+        startTime: startTime ? formatTime(startTime) : null,
+        endTime: endTime ? formatTime(endTime) : null,
+        memo: memo || null,
+      });
+      navigation.goBack();
+    } catch {
+      Alert.alert('エラー', '保存に失敗しました');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -69,68 +80,75 @@ export function AddSpotScreen() {
             <Text style={styles.dayBadgeText}>Day {dayIndex + 1}</Text>
           </LinearGradient>
 
-          <View style={styles.section}>
-            <Text style={styles.label}>スポット名 *</Text>
-            <TextInput
-              style={styles.input}
-              value={name}
-              onChangeText={setName}
-              placeholder="例: 清水寺"
-              placeholderTextColor={colors.text.quaternary}
-            />
-          </View>
+          <FormInput
+            label="スポット名 *"
+            value={name}
+            onChangeText={setName}
+            placeholder="例: 清水寺"
+          />
 
-          <View style={styles.section}>
-            <Text style={styles.label}>住所</Text>
-            <TextInput
-              style={styles.input}
-              value={address}
-              onChangeText={setAddress}
-              placeholder="例: 京都府京都市東山区清水1丁目294"
-              placeholderTextColor={colors.text.quaternary}
-            />
-          </View>
+          <FormInput
+            label="住所"
+            value={address}
+            onChangeText={setAddress}
+            placeholder="例: 京都府京都市東山区清水1丁目294"
+          />
 
           <View style={styles.row}>
             <View style={[styles.section, styles.halfSection]}>
               <Text style={styles.label}>開始時間</Text>
-              <TextInput
-                style={styles.input}
-                value={startTime}
-                onChangeText={setStartTime}
-                placeholder="HH:MM"
-                placeholderTextColor={colors.text.quaternary}
-              />
+              <TouchableOpacity style={styles.input} onPress={() => setShowStartTimePicker(true)}>
+                <Text style={startTime ? styles.inputText : styles.placeholderText}>
+                  {startTime ? formatTime(startTime) : 'HH:MM'}
+                </Text>
+              </TouchableOpacity>
+              {showStartTimePicker && (
+                <DateTimePicker
+                  value={startTime ?? new Date()}
+                  mode="time"
+                  onChange={(_, selected) => {
+                    setShowStartTimePicker(Platform.OS === 'ios');
+                    if (selected) setStartTime(selected);
+                  }}
+                />
+              )}
             </View>
             <View style={[styles.section, styles.halfSection]}>
               <Text style={styles.label}>終了時間</Text>
-              <TextInput
-                style={styles.input}
-                value={endTime}
-                onChangeText={setEndTime}
-                placeholder="HH:MM"
-                placeholderTextColor={colors.text.quaternary}
-              />
+              <TouchableOpacity style={styles.input} onPress={() => setShowEndTimePicker(true)}>
+                <Text style={endTime ? styles.inputText : styles.placeholderText}>
+                  {endTime ? formatTime(endTime) : 'HH:MM'}
+                </Text>
+              </TouchableOpacity>
+              {showEndTimePicker && (
+                <DateTimePicker
+                  value={endTime ?? new Date()}
+                  mode="time"
+                  onChange={(_, selected) => {
+                    setShowEndTimePicker(Platform.OS === 'ios');
+                    if (selected) setEndTime(selected);
+                  }}
+                />
+              )}
             </View>
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.label}>メモ</Text>
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              value={memo}
-              onChangeText={setMemo}
-              placeholder="スポットに関するメモ..."
-              placeholderTextColor={colors.text.quaternary}
-              multiline
-              numberOfLines={4}
-              textAlignVertical="top"
-            />
-          </View>
+          <FormInput
+            label="メモ"
+            value={memo}
+            onChangeText={setMemo}
+            placeholder="スポットに関するメモ..."
+            multiline
+            numberOfLines={4}
+          />
         </ScrollView>
 
         <View style={styles.footer}>
-          <GradientButton onPress={handleSave} label="追加する" />
+          <GradientButton
+            onPress={handleSave}
+            label={saving ? '保存中...' : '追加する'}
+            disabled={saving}
+          />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -150,7 +168,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing.xl,
-    paddingBottom: 40,
+    paddingBottom: spacing['5xl'],
   },
   dayBadge: {
     alignSelf: 'flex-start',
@@ -160,7 +178,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   dayBadgeText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: typography.fontSizes.md,
     fontWeight: typography.fontWeights.semibold,
   },
@@ -190,9 +208,13 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSizes.xl,
     color: colors.text.primary,
   },
-  textArea: {
-    minHeight: 100,
-    paddingTop: 12,
+  inputText: {
+    fontSize: typography.fontSizes.xl,
+    color: colors.text.primary,
+  },
+  placeholderText: {
+    fontSize: typography.fontSizes.xl,
+    color: colors.text.quaternary,
   },
   footer: {
     padding: spacing.xl,

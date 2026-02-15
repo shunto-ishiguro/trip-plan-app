@@ -8,12 +8,12 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { GradientButton } from '../components';
+import * as checklistApi from '../api/checklistItems';
+import { FormInput, GradientButton } from '../components';
 import type { RootStackScreenProps } from '../navigation/types';
 import { colors, radius, spacing, typography } from '../theme';
 
@@ -53,6 +53,7 @@ export function AddChecklistItemScreen() {
 
   const [text, setText] = useState('');
   const [selectedQuickItems, setSelectedQuickItems] = useState<string[]>([]);
+  const [saving, setSaving] = useState(false);
 
   const isPackingList = type === 'packing';
   const title = isPackingList ? '持ち物' : 'やること';
@@ -64,25 +65,29 @@ export function AddChecklistItemScreen() {
     );
   };
 
-  const handleSave = () => {
-    const items = [...selectedQuickItems];
+  const handleSave = async () => {
+    const itemTexts = [...selectedQuickItems];
     if (text.trim()) {
-      items.push(text.trim());
+      itemTexts.push(text.trim());
     }
 
-    if (items.length === 0) {
+    if (itemTexts.length === 0) {
       Alert.alert('エラー', `${title}を入力または選択してください`);
       return;
     }
 
-    // TODO: API呼び出し
-    console.log({
-      tripId,
-      type,
-      items,
-    });
-
-    navigation.goBack();
+    setSaving(true);
+    try {
+      await checklistApi.batchCreateChecklistItems(
+        tripId,
+        itemTexts.map((t) => ({ type, text: t })),
+      );
+      navigation.goBack();
+    } catch {
+      Alert.alert('エラー', '保存に失敗しました');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -107,16 +112,12 @@ export function AddChecklistItemScreen() {
             </Text>
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.label}>{title}を入力</Text>
-            <TextInput
-              style={styles.input}
-              value={text}
-              onChangeText={setText}
-              placeholder={`例: ${isPackingList ? 'パスポート' : '航空券の予約'}`}
-              placeholderTextColor={colors.text.quaternary}
-            />
-          </View>
+          <FormInput
+            label={`${title}を入力`}
+            value={text}
+            onChangeText={setText}
+            placeholder={`例: ${isPackingList ? 'パスポート' : '航空券の予約'}`}
+          />
 
           <View style={styles.section}>
             <Text style={styles.label}>よく使う{title}</Text>
@@ -152,7 +153,11 @@ export function AddChecklistItemScreen() {
         </ScrollView>
 
         <View style={styles.footer}>
-          <GradientButton onPress={handleSave} label="追加する" />
+          <GradientButton
+            onPress={handleSave}
+            label={saving ? '保存中...' : '追加する'}
+            disabled={saving}
+          />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -172,7 +177,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: spacing.xl,
-    paddingBottom: 40,
+    paddingBottom: spacing['5xl'],
   },
   typeIndicator: {
     flexDirection: 'row',
@@ -226,7 +231,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.card,
     borderWidth: 1,
     borderColor: colors.border.primary,
-    borderRadius: 20,
+    borderRadius: radius['3xl'],
     paddingHorizontal: 14,
     paddingVertical: spacing.md,
   },
