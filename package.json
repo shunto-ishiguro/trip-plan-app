@@ -11,7 +11,7 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
-    "dev:mobile": "pnpm --filter mobile start",
+    "dev:mobile": "pnpm --filter mobile start --tunnel",
     "dev:api": "pnpm --filter api dev",
     "build:api": "pnpm --filter api build",
     "typecheck": "pnpm --filter api typecheck",
