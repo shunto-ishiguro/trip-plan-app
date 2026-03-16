@@ -2,12 +2,19 @@ pre-commit:
   parallel: true
   commands:
     biome:
-      glob: "*.{js,jsx,ts,tsx,json,css}"
-      run: pnpm biome check --write {staged_files}
+      root: apps/mobile/
+      glob: "apps/mobile/**/*.{js,jsx,ts,tsx,json,css}"
+      run: npx biome check --write {staged_files}
+      stage_fixed: true
+    gofmt:
+      glob: "*.go"
+      run: gofmt -l -w {staged_files}
       stage_fixed: true
 
 pre-push:
   parallel: true
   commands:
     biome-check:
-      run: pnpm lint
+      run: cd apps/mobile && npx biome check .
+    go-build:
+      run: cd apps/api && go build ./...
