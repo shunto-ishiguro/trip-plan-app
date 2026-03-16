@@ -2,39 +2,28 @@
 
 ## 全体構成
 
-```
-┌─────────────────────────────────────────────────────┐
-│                    Mobile App                       │
-│                 Expo (React Native)                 │
-└──────────┬──────────────────────────────────────────┘
-           │ REST + WebSocket
-           ▼
-┌─────────────────────────────────────────────────────┐
-│                   API Server                        │
-│                Elysia.js (Bun)                      │
-│                                                     │
-│  REST API ──→ Drizzle ORM ──→ PostgreSQL (CRUD)     │
-│  WebSocket ←── Bun pub/sub ←── 書き込みハンドラ     │
-└──────────┬──────────────────────────────────────────┘
-           │ Drizzle ORM
-           ▼
-┌─────────────────────────────────────────────────────┐
-│                    PostgreSQL                        │
-│                (Supabase / Docker)                   │
-└─────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    Mobile["Mobile App<br/>Expo (React Native)"]
+    API["API Server<br/>Go (Echo)"]
+    DB["PostgreSQL<br/>(Supabase / Docker)"]
+
+    Mobile -- "REST + WebSocket" --> API
+    API -- "sqlc (型安全 SQL)" --> DB
 ```
 
 Mobile は API サーバーとだけ通信する（単一エントリポイント）。
 Supabase は PostgreSQL + Auth（ユーザー管理）として利用。
-リアルタイム配信は Elysia が Bun の native pub/sub で直接処理する。
+リアルタイム配信は Echo WebSocket + goroutine で直接処理する。
 
 ## モバイル API クライアント層
 
-```
-screens/ ──→ api/*.ts ──→ fetcher.ts ──→ Elysia API
-                              │
-                        SecureStore から
-                        JWT を自動付与
+```mermaid
+graph LR
+    Screens["screens/"] --> ApiModules["api/*.ts"]
+    ApiModules --> Fetcher["fetcher.ts"]
+    Fetcher -- "Bearer JWT" --> GoAPI["Go API (Echo)"]
+    SecureStore["SecureStore<br/>auth_access_token"] -.-> Fetcher
 ```
 
 - **`fetcher.ts`**: 全 API 呼び出しの共通基盤。`expo-secure-store` から `auth_access_token` を取得し `Authorization: Bearer` ヘッダーに付与
@@ -45,71 +34,53 @@ screens/ ──→ api/*.ts ──→ fetcher.ts ──→ Elysia API
 
 ## 認証・認可
 
-```
-Mobile ──Bearer JWT──→ Elysia (ローカル JWT 検証) ──→ ルートハンドラ
-                            │
-                      SUPABASE_JWT_SECRET で
-                      Web Crypto API 検証
-                      (外部ライブラリ不要)
+```mermaid
+sequenceDiagram
+    participant M as Mobile
+    participant E as Echo (API)
+    participant S as Supabase Auth
+
+    M->>S: signup / login / refresh
+    S-->>M: JWT (access_token)
+    M->>E: REST / WS + Bearer JWT
+    E->>E: golang-jwt で検証<br/>(SUPABASE_JWT_SECRET)
+    E->>E: trip_members で認可チェック
+    E-->>M: レスポンス
 ```
 
-- **認証**: Supabase Auth が JWT を発行。API は `SUPABASE_JWT_SECRET` でローカル検証
+- **認証**: Supabase Auth が JWT を発行。API は `SUPABASE_JWT_SECRET` + `golang-jwt` でローカル検証
 - **認可**: `trip_members` テーブルでロールベースアクセス制御（owner > editor > viewer）
 - **Auth API**: signup / login / refresh は Supabase Auth REST API に fetch で直接通信
-- **レート制限**: 認証エンドポイント（signup / login / refresh）は IP ベースの固定ウィンドウ制限（15分間に10回まで）
+- **レート制限**: 認証エンドポイント（signup / login / refresh）は IP ベースの固定ウィンドウ制限（Echo ミドルウェア）
 
 ## モノレポ構成
 
 ```
 trip-plan-app/
 ├── apps/
-│   ├── api/           # バックエンド API
-│   │   ├── src/
-│   │   │   ├── index.ts          # Elysia サーバー (REST + WebSocket)
-│   │   │   ├── db.ts             # Drizzle クライアント
-│   │   │   ├── schema.ts         # テーブル定義
-│   │   │   ├── jwt.ts            # JWT 検証 (Web Crypto API)
-│   │   │   ├── broadcast.ts      # WebSocket ブロードキャスト
-│   │   │   ├── validators.ts     # 入力バリデーションスキーマ
-│   │   │   ├── middleware/
-│   │   │   │   ├── auth.ts       # JWT 認証ミドルウェア
-│   │   │   │   ├── authorize.ts  # ロールベース認可
-│   │   │   │   └── rateLimit.ts  # IP ベースレート制限
-│   │   │   └── routes/           # ルートハンドラ
-│   │   └── drizzle.config.ts
+│   ├── api/           # バックエンド API (Go)
+│   │   ├── cmd/server/main.go    # エントリポイント
+│   │   ├── internal/
+│   │   │   ├── handler/          # ルートハンドラ
+│   │   │   ├── middleware/       # JWT 認証・認可・レート制限
+│   │   │   ├── ws/               # WebSocket ハブ・ブロードキャスト
+│   │   │   └── config/           # 環境変数・設定
+│   │   ├── db/
+│   │   │   ├── query/            # sqlc SQL クエリ (.sql)
+│   │   │   ├── sqlc.yaml         # sqlc 設定
+│   │   │   └── generated/        # sqlc 生成コード
+│   │   ├── go.mod
+│   │   └── go.sum
 │   ├── mobile/        # モバイルアプリ
 │   │   ├── App.tsx
+│   │   ├── biome.json
+│   │   ├── package.json
 │   │   └── src/
 │   │       ├── api/            # API クライアント
-│   │       │   ├── config.ts   # ベース URL（ngrok / Expo hostUri / localhost）
-│   │       │   ├── fetcher.ts  # 共通 fetch（JWT 自動付与）
-│   │       │   ├── auth.ts     # 認証 API (signup/login/refresh)
-│   │       │   ├── trips.ts
-│   │       │   ├── spots.ts
-│   │       │   ├── budgetItems.ts
-│   │       │   ├── checklistItems.ts
-│   │       │   ├── reservations.ts
-│   │       │   └── shares.ts         # 共有設定・参加 API
-│   │       ├── components/     # UI コンポーネント（Ionicons 使用）
-│   │       │   ├── TripCard.tsx        # トリップ一覧カード
-│   │       │   ├── SpotCard.tsx        # スポットカード
-│   │       │   ├── BudgetItemCard.tsx  # 予算カード
-│   │       │   ├── ChecklistItemRow.tsx# チェックリスト行
-│   │       │   ├── ReservationCard.tsx # 予約カード
-│   │       │   ├── ShareSheet.tsx      # 合言葉共有ボトムシート
-│   │       │   ├── FAB.tsx             # Floating Action Button
-│   │       │   ├── GradientButton.tsx  # グラデーションボタン
-│   │       │   ├── FormInput.tsx       # フォーム入力
-│   │       │   └── EmptyState.tsx      # 空リストプレースホルダー
-│   │       ├── contexts/
-│   │       │   ├── AuthContext.tsx      # 認証状態管理（JWT 保存・復元）
-│   │       │   └── TripContext.tsx      # トリップデータ管理
-│   │       ├── hooks/
-│   │       │   ├── useFocusData.ts     # フォーカス時データ取得
-│   │       │   └── useDeleteConfirmation.ts # 削除確認ダイアログ
-│   │       ├── utils/
-│   │       │   └── date.ts             # 日付フォーマット
-│   │       ├── screens/        # 画面（DateTimePicker 使用）
+│   │       ├── components/     # UI コンポーネント
+│   │       ├── contexts/       # AuthContext, TripContext
+│   │       ├── hooks/          # useFocusData, useDeleteConfirmation
+│   │       ├── screens/        # 画面
 │   │       ├── navigation/
 │   │       ├── theme/
 │   │       └── types/
@@ -117,49 +88,60 @@ trip-plan-app/
 │       ├── config.toml
 │       ├── seed.sql
 │       └── migrations/
-├── .env
 ├── .env.example
-├── biome.json
-├── lefthook.yml
-├── turbo.json
-└── pnpm-workspace.yaml
+├── .editorconfig
+└── lefthook.yml
 ```
 
 ## データフロー
 
 ### CRUD 操作
 
-```
-Mobile  ──REST──→  Elysia.js  ──Drizzle──→  PostgreSQL
-  ↑                    │
-  └────────────────────┘
-        JSON レスポンス
+```mermaid
+sequenceDiagram
+    participant M as Mobile
+    participant E as Echo
+    participant DB as PostgreSQL
+
+    M->>E: REST リクエスト
+    E->>DB: sqlc クエリ
+    DB-->>E: 結果
+    E-->>M: JSON レスポンス
 ```
 
 ### リアルタイム共同編集
 
-```
-Mobile A ──POST──→ Elysia.js ──Drizzle──→ PostgreSQL
-                       │
-                       ├── JSON レスポンス → Mobile A
-                       │
-                       └── broadcast() → Bun pub/sub
-                                            │
-Mobile B ←──────── WebSocket ──────────────┘
-         { type: "INSERT", table: "spots", record: {...} }
+```mermaid
+sequenceDiagram
+    participant A as Mobile A
+    participant E as Echo
+    participant DB as PostgreSQL
+    participant Hub as WS Hub<br/>(goroutine)
+    participant B as Mobile B
+
+    A->>E: POST (データ書き込み)
+    E->>DB: sqlc INSERT/UPDATE
+    DB-->>E: 結果
+    E-->>A: JSON レスポンス
+    E->>Hub: broadcast()
+    Hub-->>B: WebSocket push<br/>{ type, table, record }
 ```
 
 API 自身が書き込み元なので DB 変更検知は不要。
-書き込みハンドラ内で `broadcast()` を呼び、Bun の native pub/sub でトリップルームの全クライアントに配信する。
+書き込みハンドラ内で `broadcast()` を呼び、goroutine ベースの Hub でトリップルームの全クライアントに配信する。
 
 ### WebSocket 接続
 
-```
-Mobile ──ws://host/api/v1/trips/:tripId/ws?token=JWT──→ Elysia
-                                                          │
-                                                    JWT 検証 + 認可
-                                                          │
-                                                    ws.subscribe(`trip:${tripId}`)
+```mermaid
+sequenceDiagram
+    participant M as Mobile
+    participant E as Echo
+    participant Hub as WS Hub
+
+    M->>E: ws://.../trips/:tripId/ws?token=JWT
+    E->>E: JWT 検証 + 認可
+    E->>Hub: hub.Subscribe(tripId, conn)
+    Hub-->>M: リアルタイムイベント配信
 ```
 
 ## 認可マトリクス
@@ -175,30 +157,38 @@ Mobile ──ws://host/api/v1/trips/:tripId/ws?token=JWT──→ Elysia
 
 | 技術 | 理由 |
 |------|------|
-| Elysia.js + Bun | 高速、型安全、軽量。WebSocket ネイティブ対応。Bun ランタイムで起動・ビルドが速い |
-| Drizzle ORM | 型安全な SQL ビルダー。軽量で Bun と相性が良い |
+| Go (Echo) | 高い並行処理性能（goroutine）、シングルバイナリデプロイ、低メモリ消費。共同編集の多数同時接続に強い |
+| sqlc | SQL から型安全な Go コードを自動生成。ORM のオーバーヘッドなく、生 SQL の柔軟性を維持 |
 | Supabase (PostgreSQL + Auth) | PostgreSQL + ユーザー認証を一括提供。ローカル開発が容易 |
-| Bun WebSocket (pub/sub) | 外部依存なしでリアルタイム配信。Elysia と統合済み |
+| Echo WebSocket | gorilla/websocket ベース。goroutine で効率的な pub/sub を実装 |
 | Expo | React Native のビルド・デプロイを簡素化。OTA アップデート対応 |
-| pnpm + Turborepo | 高速な依存解決 + タスクキャッシュでモノレポを効率管理 |
-
-## Elysia WebSocket を選んだ理由
-
-- **単一エントリポイント**: Mobile は API だけと通信すればよい
-- **外部依存ゼロ**: Supabase Realtime / RLS 不要。Bun の native pub/sub で完結
-- **ビジネスロジック集約**: 認証・認可・データ加工を API 側で一元管理
-- **シンプル**: 書き込み元 = API なので DB 変更検知が不要。ハンドラ内で直接 broadcast
 
 ## DB スキーマ
 
-```
-trips (owner_id → auth.users)
-├── spots            (trip_id FK, CASCADE)
-├── budget_items     (trip_id FK, CASCADE)
-├── checklist_items  (trip_id FK, CASCADE)
-├── reservations     (trip_id FK, CASCADE)
-├── share_settings   (trip_id FK, CASCADE, UNIQUE, share_token)
-└── trip_members     (trip_id FK, CASCADE, user_id → auth.users, role)
+```mermaid
+erDiagram
+    trips ||--o{ spots : "trip_id FK CASCADE"
+    trips ||--o{ budget_items : "trip_id FK CASCADE"
+    trips ||--o{ checklist_items : "trip_id FK CASCADE"
+    trips ||--o{ reservations : "trip_id FK CASCADE"
+    trips ||--o| share_settings : "trip_id FK CASCADE UNIQUE"
+    trips ||--o{ trip_members : "trip_id FK CASCADE"
+
+    trips {
+        uuid id PK
+        uuid owner_id FK
+    }
+    trip_members {
+        uuid id PK
+        uuid trip_id FK
+        uuid user_id FK
+        enum role "owner | editor | viewer"
+    }
+    share_settings {
+        uuid id PK
+        uuid trip_id FK
+        text share_token
+    }
 ```
 
 全テーブルの主キーは UUID。子テーブルは親 trip の削除時にカスケード削除される。

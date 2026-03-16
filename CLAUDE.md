@@ -9,35 +9,35 @@
 ```
 apps/
   mobile/    # Expo SDK 54 (React Native) — モバイルアプリ
-  api/       # Elysia.js (Bun) + Drizzle ORM — REST + WebSocket API
+  api/       # Go (Echo) + sqlc — REST + WebSocket API
   supabase/  # Supabase ローカル開発設定（PostgreSQL + Auth）
 ```
 
 ## 技術スタック
 
 - **Mobile**: Expo (React Native), TypeScript
-- **API**: Elysia.js (Bun runtime), Drizzle ORM
+- **API**: Go (Echo framework), sqlc
 - **DB**: PostgreSQL (Supabase)
-- **Auth**: Supabase Auth → JWT をローカル検証
-- **Realtime**: Elysia WebSocket + Bun native pub/sub
-- **Monorepo**: pnpm workspaces + Turborepo
-- **Lint/Format**: Biome
+- **Auth**: Supabase Auth → JWT をローカル検証 (golang-jwt)
+- **Realtime**: Echo WebSocket (gorilla/websocket)
+- **Lint/Format**: Biome (mobile), gofmt/golangci-lint (API)
+- **Git Hooks**: lefthook (スタンドアロン、`go install` で導入)
 
 ## 開発環境
 
 ### 前提条件
 
-- Node.js 22+, pnpm 10+, Bun 1.2+, Supabase CLI
+- Node.js 22+, pnpm 10+, Go 1.23+, Supabase CLI
 - WSL2 上で開発（Windows ホスト + WSL2 Linux）
 
 ### 開発サーバー起動
 
 ```bash
 # API サーバー（別ターミナル）
-pnpm dev:api          # http://localhost:3000
+cd apps/api && go run ./cmd/server   # http://localhost:3000
 
 # モバイル（Expo — トンネルモードがデフォルト）
-pnpm dev:mobile       # = expo start --tunnel
+cd apps/mobile && pnpm start --tunnel
 ```
 
 ### WSL2 + 実機テスト
@@ -87,16 +87,17 @@ ngrok の無料プランでは URL が毎回変わるため、起動のたびに
 ## よく使うコマンド
 
 ```bash
-pnpm dev              # 全サービス起動（turbo）
-pnpm dev:api          # API のみ
-pnpm dev:mobile       # Mobile のみ
-pnpm lint             # Biome lint
-pnpm lint:fix         # Biome lint + 自動修正
-pnpm format           # Biome format
-pnpm typecheck        # API 型チェック
+# Mobile
+cd apps/mobile && pnpm start        # Expo 起動
+cd apps/mobile && pnpm start --tunnel  # トンネルモード
+cd apps/mobile && pnpm lint         # Biome lint
+cd apps/mobile && pnpm lint:fix     # Biome lint + 自動修正
+cd apps/mobile && pnpm format       # Biome format
 
-# DB
-pnpm --filter api run db:pull       # DB スキーマを Drizzle に取り込み
+# API (Go)
+cd apps/api && go run ./cmd/server  # API 起動
+cd apps/api && go test ./...        # テスト
+cd apps/api && sqlc generate        # sqlc コード生成
 
 # Supabase
 supabase start        # ローカル Supabase 起動
@@ -105,6 +106,7 @@ supabase db reset     # マイグレーション + シード適用
 
 ## コーディング規約
 
+### Mobile (TypeScript)
 - **Linter/Formatter**: Biome（`biome.json`）— pre-commit hook で自動実行
 - **言語**: TypeScript strict
 - **UI コンポーネント**: React Native + Ionicons（`@expo/vector-icons`）
@@ -112,3 +114,10 @@ supabase db reset     # マイグレーション + シード適用
 - **インポート順**: Biome の自動整列に従う（`@expo` → `@react` → `expo-*` → ローカル）
 - **API クライアント**: `apps/mobile/src/api/` 配下に CRUD 関数を型安全に定義
 - **画面パターン**: `useFocusData` フックでフォーカス時データ取得、`useDeleteConfirmation` で削除確認 + 楽観的更新
+
+### API (Go)
+- **Formatter**: gofmt（標準）
+- **Linter**: golangci-lint
+- **DB クエリ**: sqlc で SQL → Go コード生成（型安全）
+- **プロジェクト構成**: Go 標準レイアウト（`cmd/`, `internal/`, `db/`）
+- **エラーハンドリング**: Echo の `HTTPError` + カスタムエラー型
