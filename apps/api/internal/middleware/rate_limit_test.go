@@ -35,9 +35,9 @@ func makeRequest(e *echo.Echo, handler echo.HandlerFunc, ip string) int {
 
 func TestRateLimit_WithinLimit(t *testing.T) {
 	rl := &RateLimiter{
-		store:    make(map[string]*rateLimitEntry),
-		max:      5,
-		windowMs: time.Minute,
+		store:  make(map[string]*rateLimitEntry),
+		max:    5,
+		window: time.Minute,
 	}
 	e, handler := setupRateLimitTest(rl)
 
@@ -51,9 +51,9 @@ func TestRateLimit_WithinLimit(t *testing.T) {
 
 func TestRateLimit_ExceedsLimit(t *testing.T) {
 	rl := &RateLimiter{
-		store:    make(map[string]*rateLimitEntry),
-		max:      3,
-		windowMs: time.Minute,
+		store:  make(map[string]*rateLimitEntry),
+		max:    3,
+		window: time.Minute,
 	}
 	e, handler := setupRateLimitTest(rl)
 
@@ -72,9 +72,9 @@ func TestRateLimit_ExceedsLimit(t *testing.T) {
 
 func TestRateLimit_DifferentIPs(t *testing.T) {
 	rl := &RateLimiter{
-		store:    make(map[string]*rateLimitEntry),
-		max:      1,
-		windowMs: time.Minute,
+		store:  make(map[string]*rateLimitEntry),
+		max:    1,
+		window: time.Minute,
 	}
 	e, handler := setupRateLimitTest(rl)
 
@@ -99,9 +99,9 @@ func TestRateLimit_DifferentIPs(t *testing.T) {
 
 func TestRateLimit_WindowExpiry(t *testing.T) {
 	rl := &RateLimiter{
-		store:    make(map[string]*rateLimitEntry),
-		max:      1,
-		windowMs: 50 * time.Millisecond,
+		store:  make(map[string]*rateLimitEntry),
+		max:    1,
+		window: 50 * time.Millisecond,
 	}
 	e, handler := setupRateLimitTest(rl)
 

@@ -86,7 +86,7 @@ func (h *TripsHandler) CreateTrip(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to begin transaction")
 	}
-	defer tx.Rollback(ctx)
+	defer tx.Rollback(ctx) //nolint:errcheck
 
 	qtx := h.queries.WithTx(tx)
 

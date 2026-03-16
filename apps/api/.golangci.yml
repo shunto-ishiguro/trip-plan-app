@@ -1,0 +1,7 @@
+version: "2"
+
+linters:
+  exclusions:
+    paths:
+      - db/generated
+      - ".*_test\\.go"

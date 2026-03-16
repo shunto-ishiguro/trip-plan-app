@@ -15,17 +15,17 @@ type rateLimitEntry struct {
 }
 
 type RateLimiter struct {
-	mu       sync.Mutex
-	store    map[string]*rateLimitEntry
-	max      int
-	windowMs time.Duration
+	mu     sync.Mutex
+	store  map[string]*rateLimitEntry
+	max    int
+	window time.Duration
 }
 
-func NewRateLimiter(max int, windowMs time.Duration) *RateLimiter {
+func NewRateLimiter(max int, window time.Duration) *RateLimiter {
 	rl := &RateLimiter{
-		store:    make(map[string]*rateLimitEntry),
-		max:      max,
-		windowMs: windowMs,
+		store:  make(map[string]*rateLimitEntry),
+		max:    max,
+		window: window,
 	}
 
 	// cleanup expired entries every 5 minutes
@@ -70,7 +70,7 @@ func (rl *RateLimiter) Middleware() echo.MiddlewareFunc {
 			if !ok || now.After(entry.expiresAt) {
 				rl.store[ip] = &rateLimitEntry{
 					count:     1,
-					expiresAt: now.Add(rl.windowMs),
+					expiresAt: now.Add(rl.window),
 				}
 				rl.mu.Unlock()
 				return next(c)

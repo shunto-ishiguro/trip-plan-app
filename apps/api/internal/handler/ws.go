@@ -64,7 +64,7 @@ func (h *WSHandler) HandleWS(c echo.Context) error {
 		log.Printf("websocket upgrade failed: %v", err)
 		return err
 	}
-	defer conn.Close()
+	defer conn.Close() //nolint:errcheck
 
 	client := &ws.Client{
 		Conn:   conn,

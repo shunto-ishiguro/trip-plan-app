@@ -75,7 +75,7 @@ func (h *Handler) Signup(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to reach auth service")
 	}
-	defer adminResp.Body.Close()
+	defer adminResp.Body.Close() //nolint:errcheck
 
 	if adminResp.StatusCode == http.StatusUnprocessableEntity || adminResp.StatusCode == http.StatusConflict {
 		return echo.NewHTTPError(http.StatusConflict, "user already exists")
@@ -136,7 +136,7 @@ func (h *Handler) Refresh(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to reach auth service")
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -196,7 +196,7 @@ func (h *Handler) doLogin(c echo.Context, email, password string) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to reach auth service")
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
