@@ -5,19 +5,15 @@ Trip Plan Appのモバイルアプリ（Expo / React Native）
 ## 技術スタック
 
 - Expo 54
-- React Native 0.83
-- React 19
+- React Native
 - TypeScript
 
 ## 開発
 
 ```bash
-# ルートディレクトリから
-pnpm dev:mobile
-
-# または直接
 cd apps/mobile
-pnpm start
+pnpm start           # Expo 起動
+pnpm start --tunnel  # トンネルモード（WSL2 実機テスト用）
 ```
 
 Expo Go アプリでQRコードをスキャンして確認
@@ -35,6 +31,14 @@ pnpm web        # Webブラウザ
 ```
 App.tsx      # メインコンポーネント
 index.ts     # エントリーポイント
-assets/      # 画像・フォントなど
-app.json     # Expo設定
+biome.json   # Biome 設定
+src/
+  api/         # API クライアント
+  components/  # UI コンポーネント
+  contexts/    # AuthContext, TripContext
+  hooks/       # カスタムフック
+  screens/     # 画面
+  navigation/  # ナビゲーション
+  theme/       # テーマ
+  types/       # 型定義
 ```

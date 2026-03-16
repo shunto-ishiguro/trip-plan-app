@@ -5,11 +5,11 @@
 | レイヤー | 技術 |
 |---------|------|
 | Mobile | Expo (React Native) |
-| API | Elysia.js (Bun) |
-| ORM | Drizzle ORM |
+| API | Go (Echo) |
+| DB アクセス | sqlc |
 | Database | PostgreSQL (Supabase) |
-| Realtime | Elysia WebSocket (Bun native pub/sub) |
-| Auth | Supabase Auth (JWT ローカル検証) |
+| Realtime | Echo WebSocket (goroutine Hub) |
+| Auth | Supabase Auth (golang-jwt でローカル検証) |
 
 ---
 

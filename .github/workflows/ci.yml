@@ -7,18 +7,24 @@ on:
     branches: [main, develop]
 
 jobs:
-  lint:
-    name: Lint
+  lint-mobile:
+    name: Lint (Mobile)
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
     steps:
       - uses: actions/checkout@v6
 
       - uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
       - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: 'pnpm'
+          cache-dependency-path: apps/mobile/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -26,46 +32,37 @@ jobs:
       - name: Run Biome
         run: pnpm lint
 
-  typecheck:
-    name: Typecheck
+  api-build:
+    name: Build & Test (API)
     runs-on: ubuntu-latest
-    needs: [lint]
     steps:
       - uses: actions/checkout@v6
 
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-go@v5
         with:
-          node-version: 22
-          cache: 'pnpm'
+          go-version: '1.23'
+          cache-dependency-path: apps/api/go.sum
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Build
+        working-directory: apps/api
+        run: go build ./...
 
-      - name: Typecheck API
-        run: pnpm typecheck
+      - name: Test
+        working-directory: apps/api
+        run: go test ./...
 
-  build-api:
-    name: Build (API)
+  api-lint:
+    name: Lint (API)
     runs-on: ubuntu-latest
-    needs: [lint]
     steps:
       - uses: actions/checkout@v6
 
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-go@v5
         with:
-          node-version: 22
-          cache: 'pnpm'
+          go-version: '1.23'
+          cache-dependency-path: apps/api/go.sum
 
-      - uses: oven-sh/setup-bun@v2
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
         with:
-          bun-version: latest
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build API
-        run: pnpm build:api
+          working-directory: apps/api
